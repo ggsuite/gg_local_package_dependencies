@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:gg_args/gg_args.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:gg_log/gg_log.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 // #############################################################################
@@ -100,3 +101,6 @@ class Graph extends DirCommand<void> {
     }
   }
 }
+
+/// Mock of Graph
+class MockGraph extends Mock implements Graph {}

@@ -12,6 +12,7 @@ dependencies:
   gg_console_colors: ^2.1.2
   gg_log: ^1.0.3
   gg_process: ^1.1.4
+  mocktail: ^1.0.3
   path: ^1.8.0
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3

@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:gg_args/gg_args.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:gg_log/gg_log.dart';
+import 'package:mocktail/mocktail.dart';
 
 // #############################################################################
 /// Creates a processing list of dart packages in a folder
@@ -73,3 +74,6 @@ class ProcessingList extends DirCommand<void> {
 
   final Graph _graph;
 }
+
+/// Mock of Graph
+class MockProcessingList extends Mock implements ProcessingList {}

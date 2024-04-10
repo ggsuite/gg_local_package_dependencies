@@ -12,7 +12,9 @@ import 'package:path/path.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final d = Directory(join('test', 'sample_folder'));
+  final d = Directory(join('test', 'sample_folder', 'hierarchical'));
+  final dPlain = Directory(join('test', 'sample_folder', 'plain'));
+  final dDuplicate = Directory(join('test', 'sample_folder', 'duplicates'));
   late Graph graph;
   final messages = <String>[];
   final ggLog = messages.add;
@@ -31,7 +33,7 @@ void main() {
   tearDown(() {});
 
   group('Graph', () {
-    group('main cases', () {
+    group('main case', () {
       group('should return a graph showing package dependencies', () {
         test('programmatically', () async {
           final result = await graph.get(directory: d, ggLog: ggLog);
@@ -102,6 +104,33 @@ void main() {
         });
       });
     });
-    group('special cases', () {});
+    group('special case', () {
+      test(
+        'folder does contain a plain list of independent packages',
+        () async {
+          final result = await graph.get(directory: dPlain, ggLog: ggLog);
+
+          final names = result.keys.toList()..sort();
+          expect(names, ['pack0', 'pack1', 'pack2']);
+        },
+      );
+
+      group('should throw', () {
+        test('when multiple packages have the same name', () async {
+          late Exception exception;
+          try {
+            await graph.get(directory: dDuplicate, ggLog: ggLog);
+          } catch (e) {
+            exception = e as Exception;
+          }
+
+          expect(exception, isA<Exception>());
+          expect(
+            exception.toString(),
+            'Exception: Duplicate package name: pack0',
+          );
+        });
+      });
+    });
   });
 }

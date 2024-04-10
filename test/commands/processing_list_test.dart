@@ -13,7 +13,9 @@ import 'package:test/test.dart';
 
 void main() {
   group('ProcessingList', () {
-    final d = Directory(join('test', 'sample_folder'));
+    final d = Directory(join('test', 'sample_folder', 'hierarchical'));
+    final dPlain = Directory(join('test', 'sample_folder', 'plain'));
+
     late ProcessingList processingList;
     final messages = <String>[];
     final ggLog = messages.add;
@@ -59,6 +61,16 @@ void main() {
         });
       });
     });
-    group('special cases', () {});
+    group('special cases', () {
+      test(
+        'folder does contain a plain list of independent packages',
+        () async {
+          final result =
+              await processingList.get(directory: dPlain, ggLog: ggLog);
+          final names = result.map((e) => e.name).toList()..sort();
+          expect(names, ['pack0', 'pack1', 'pack2']);
+        },
+      );
+    });
   });
 }

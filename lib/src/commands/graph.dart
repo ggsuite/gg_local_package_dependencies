@@ -64,6 +64,11 @@ class Graph extends DirCommand<void> {
         directory: dartPackage,
         pubspec: pubspecYaml,
       );
+
+      if (nodes.containsKey(node.name)) {
+        throw Exception('Duplicate package name: ${node.name}');
+      }
+
       nodes[node.name] = node;
     }
 

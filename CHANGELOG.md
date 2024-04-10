@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.3] - 2024-04-10
+
+### Added
+
+- additional test cases
+
 ## [1.0.2] - 2024-04-10
 
 ### Added
@@ -22,6 +28,7 @@
 
 - initial
 
+[1.0.3]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/inlavigo/gg_local_package_dependencies/tag/%tag

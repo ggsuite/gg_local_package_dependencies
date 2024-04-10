@@ -26,12 +26,8 @@ void main() {
 
       final stdout = result.stdout as String;
       expect(stdout, contains('Could not find a subcommand named xyz'));
-      expect(
-        stdout,
-        contains(
-          'graph   Prints dependency graph of packages in a folder',
-        ),
-      );
+      expect(stdout, contains('graph  '));
+      expect(stdout, contains('processing-list  '));
     });
   });
 

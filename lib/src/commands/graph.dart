@@ -12,13 +12,14 @@ import 'package:gg_log/gg_log.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 // #############################################################################
-/// An example command
+/// Returns dependency graph of packages in a local folder.
 class Graph extends DirCommand<void> {
   /// Constructor
   Graph({
     required super.ggLog,
     super.name = 'graph',
-    super.description = 'Prints dependency graph of packages in a folder',
+    super.description =
+        'Returns dependency graph of packages in a local folder.',
   });
 
   // ...........................................................................

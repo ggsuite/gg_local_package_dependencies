@@ -7,8 +7,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:gg_console_colors/gg_console_colors.dart';
-import 'package:gg_capture_print/gg_capture_print.dart';
 import 'package:test/test.dart';
 
 import '../../bin/gg_local_package_dependencies.dart';
@@ -21,22 +19,19 @@ void main() {
       // Execute bin/gg_local_package_dependencies.dart and check if it prints help
       final result = await Process.run(
         './bin/gg_local_package_dependencies.dart',
-        ['my-command'],
+        ['xyz'],
         stdoutEncoding: utf8,
         stderrEncoding: utf8,
       );
 
-      final expectedMessages = [
-        'Invalid argument(s): Option',
-        red('input'),
-        'is mandatory.',
-      ];
-
       final stdout = result.stdout as String;
-
-      for (final msg in expectedMessages) {
-        expect(stdout, contains(msg));
-      }
+      expect(stdout, contains('Could not find a subcommand named xyz'));
+      expect(
+        stdout,
+        contains(
+          'graph   Prints dependency graph of packages in a folder',
+        ),
+      );
     });
   });
 
@@ -46,13 +41,12 @@ void main() {
       test('should print "value"', () async {
         // Execute bin/gg_local_package_dependencies.dart and check if it prints "value"
         final messages = <String>[];
-        await run(args: ['my-command', '--input', '5'], ggLog: messages.add);
+        await run(args: ['graph', '--xyz', '5'], ggLog: messages.add);
 
-        final expectedMessages = ['Running my-command with param 5'];
-
-        for (final msg in expectedMessages) {
-          expect(hasLog(messages, msg), isTrue);
-        }
+        expect(
+          messages.last,
+          contains('Could not find an option named xyz.'),
+        );
       });
     });
   });

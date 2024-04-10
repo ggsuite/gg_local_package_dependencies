@@ -1,0 +1,6 @@
+name: pack01
+version: 1.0.0
+
+dependencies:
+  pack011: ^1.0.0
+  pack012: ^1.0.0

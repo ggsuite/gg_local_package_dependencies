@@ -5,14 +5,14 @@
 // found in the LICENSE file in the root of this package.
 
 import 'package:args/command_runner.dart';
-import './commands/my_command.dart';
+import 'commands/graph.dart';
 import 'package:gg_log/gg_log.dart';
 
 /// The command line interface for GgLocalPackageDependencies
 class GgLocalPackageDependencies extends Command<dynamic> {
   /// Constructor
   GgLocalPackageDependencies({required this.ggLog}) {
-    addSubcommand(MyCommand(ggLog: ggLog));
+    addSubcommand(Graph(ggLog: ggLog));
   }
 
   /// The log function

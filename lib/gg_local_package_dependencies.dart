@@ -7,3 +7,5 @@
 library;
 
 export 'src/gg_local_package_dependencies.dart';
+export 'src/commands/graph.dart';
+export 'src/tools/node.dart';

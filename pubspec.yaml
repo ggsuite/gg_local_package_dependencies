@@ -13,6 +13,8 @@ dependencies:
   gg_log: ^1.0.3
   gg_process: ^1.1.4
   path: ^1.8.0
+  pub_semver: ^2.1.4
+  pubspec_parse: ^1.2.3
 
 dev_dependencies:
   gg_capture_print: ^1.0.6

@@ -6,8 +6,6 @@
 
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
-import 'package:gg_capture_print/gg_capture_print.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:test/test.dart';
 import 'package:gg_args/gg_args.dart';
@@ -24,21 +22,6 @@ void main() {
     group('GgLocalPackageDependencies', () {
       final ggLocalPackageDependencies =
           GgLocalPackageDependencies(ggLog: messages.add);
-
-      final CommandRunner<void> runner = CommandRunner<void>(
-        'ggLocalPackageDependencies',
-        'Description goes here.',
-      )..addCommand(ggLocalPackageDependencies);
-
-      test('should allow to run the code from command line', () async {
-        await capturePrint(
-          ggLog: messages.add,
-          code: () async => await runner.run(
-            ['ggLocalPackageDependencies', 'my-command', '--input', 'foo'],
-          ),
-        );
-        expect(messages, contains('Running my-command with param foo'));
-      });
 
       // .......................................................................
       test('should show all sub commands', () async {

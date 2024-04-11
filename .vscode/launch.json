@@ -10,8 +10,9 @@
       "type": "dart",
       "request": "launch",
       "program": "${workspaceFolder}/bin/gg_local_package_dependencies.dart",
-      "args": ["--param", "value"],
-      "console": "debugConsole"
+      "args": ["graph", "-i", "."],
+      "console": "debugConsole",
+      "cwd": "${workspaceFolder}/.."
     },
     {
       "name": "Current File",

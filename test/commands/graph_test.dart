@@ -15,6 +15,7 @@ void main() {
   final d = Directory(join('test', 'sample_folder', 'hierarchical'));
   final dPlain = Directory(join('test', 'sample_folder', 'plain'));
   final dDuplicate = Directory(join('test', 'sample_folder', 'duplicates'));
+  final dCircular = Directory(join('test', 'sample_folder', 'circular'));
   late Graph graph;
   final messages = <String>[];
   final ggLog = messages.add;
@@ -102,6 +103,18 @@ void main() {
           expect(messages[5], '  pack03');
           expect(messages[6], '    pack031');
         });
+      });
+
+      test('should complain about circular dependencies', () async {
+        late String exception;
+        try {
+          await graph.get(directory: dCircular, ggLog: ggLog);
+        } catch (e) {
+          exception = e.toString();
+        }
+
+        expect(exception, contains('Please remove circular dependency:'));
+        expect(exception, contains('pack2 -> pack3b -> pack1 -> pack2'));
       });
     });
     group('special case', () {

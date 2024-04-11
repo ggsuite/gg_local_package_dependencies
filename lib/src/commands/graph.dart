@@ -7,6 +7,7 @@
 import 'dart:io';
 
 import 'package:gg_args/gg_args.dart';
+import 'package:gg_console_colors/gg_console_colors.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:gg_log/gg_log.dart';
 import 'package:mocktail/mocktail.dart';
@@ -91,6 +92,12 @@ class Graph extends DirCommand<void> {
       }
     }
 
+    // Detect circular dependencies
+    final coveredNodes = <Node>[];
+    for (final node in nodes.values) {
+      _detectCircularDependencies(node, coveredNodes);
+    }
+
     // We want only root nodes.
     // A root node is a node that has no dependents.
     final rootNodes = nodes.values.where((node) => node.dependents.isEmpty);
@@ -103,6 +110,30 @@ class Graph extends DirCommand<void> {
     ggLog(' ' * indentation * 2 + node.name);
     for (final dependency in node.dependencies.values) {
       _printNode(dependency, ggLog, indentation + 1);
+    }
+  }
+
+  // ...........................................................................
+  void _detectCircularDependencies(Node node, List<Node> coveredNodes) {
+    if (coveredNodes.contains(node)) {
+      final indexOCoveredNode = coveredNodes.indexOf(node);
+      final circularNodes = [
+        ...coveredNodes.sublist(indexOCoveredNode),
+        node,
+      ];
+      final circularNodeNames = circularNodes.map((n) => n.name).join(' -> ');
+
+      final part0 = red('Please remove circular dependency:\n');
+      final part1 = yellow(circularNodeNames);
+
+      throw Exception('$part0$part1');
+    }
+
+    for (final dependency in node.dependencies.values) {
+      _detectCircularDependencies(
+        dependency,
+        [...coveredNodes, node],
+      );
     }
   }
 }

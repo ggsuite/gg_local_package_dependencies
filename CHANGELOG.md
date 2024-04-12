@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Removed
+
+- dependency to gg\_install\_gg, remove ./check script
+
 ## [1.1.0] - 2024-04-12
 
 ### Added
@@ -40,6 +46,7 @@
 
 - initial
 
+[Unreleased]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.0...HEAD
 [1.1.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.4...1.1.0
 [1.0.4]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.2...1.0.3

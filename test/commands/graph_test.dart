@@ -16,6 +16,7 @@ void main() {
   final dPlain = Directory(join('test', 'sample_folder', 'plain'));
   final dDuplicate = Directory(join('test', 'sample_folder', 'duplicates'));
   final dCircular = Directory(join('test', 'sample_folder', 'circular'));
+  final dDev = Directory(join('test', 'sample_folder', 'dev'));
   late Graph graph;
   final messages = <String>[];
   final ggLog = messages.add;
@@ -116,6 +117,19 @@ void main() {
         expect(exception, contains('Please remove circular dependency:'));
         expect(exception, contains('pack2 -> pack3b -> pack1 -> pack2'));
       });
+
+      test('should incorporate dev dependencies', () async {
+        final result = await graph.get(directory: dDev, ggLog: ggLog);
+
+        final names = result.keys.toList()..sort();
+        expect(names, ['pack0', 'pack1', 'pack2']);
+
+        final pack1 = result['pack1']!;
+        expect(pack1.dependencies.keys.toList()..sort(), ['pack_dev_0']);
+
+        final packDev0 = pack1.dependencies['pack_dev_0']!;
+        expect(packDev0.dependencies.keys.toList()..sort(), ['pack_dev_1']);
+      });
     });
     group('special case', () {
       test(
@@ -142,6 +156,20 @@ void main() {
             exception.toString(),
             'Exception: Duplicate package name: pack0',
           );
+        });
+
+        test('when a package contains an invalid pubspec.yaml', () async {
+          final d = await Directory.systemTemp.create();
+          final f = File(join(d.path, 'pubspec.yaml'));
+          await f.writeAsString('no-name: pack0\n');
+
+          late String exception;
+          try {
+            await graph.get(directory: d, ggLog: ggLog);
+          } catch (e) {
+            exception = e.toString();
+          }
+          expect(exception, contains('Error parsing pubspec.yaml'));
         });
       });
     });

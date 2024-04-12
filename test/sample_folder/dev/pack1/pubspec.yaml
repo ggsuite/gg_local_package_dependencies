@@ -1,8 +1,5 @@
 name: pack1
 version: 1.0.0
 
-dependencies:
-  pack2: ^1.0.0
-
 dev_dependencies:
   pack_dev_0: ^1.0.0

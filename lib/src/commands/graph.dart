@@ -38,6 +38,7 @@ class Graph extends DirCommand<void> {
 
   // ...........................................................................
   /// Returns a map of all root nodes in the dependency graph
+  @override
   Future<Map<String, Node>> get({
     required Directory directory,
     required GgLog ggLog,
@@ -59,7 +60,12 @@ class Graph extends DirCommand<void> {
     for (final dartPackage in dartPackages) {
       final pubspec = File('${dartPackage.path}/pubspec.yaml');
       final pubspecContent = await pubspec.readAsString();
-      final pubspecYaml = Pubspec.parse(pubspecContent);
+      late Pubspec pubspecYaml;
+      try {
+        pubspecYaml = Pubspec.parse(pubspecContent);
+      } catch (e) {
+        throw Exception(red('Error parsing pubspec.yaml:') + e.toString());
+      }
       final node = Node(
         name: pubspecYaml.name,
         directory: dartPackage,
@@ -76,7 +82,12 @@ class Graph extends DirCommand<void> {
     // Estimate dependencies of all nodes
     for (final node in nodes.values) {
       // Iterate all dependencies
-      for (final dependency in node.pubspec.dependencies.keys) {
+      final keys = [
+        ...node.pubspec.dependencies.keys,
+        ...node.pubspec.devDependencies.keys,
+      ];
+
+      for (final dependency in keys) {
         // Is the dependency locally found?
         final isFound = nodes.containsKey(dependency);
         if (!isFound) continue;

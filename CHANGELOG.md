@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0] - 2024-04-12
+
+### Added
+
+- support dev dependencies
+
 ## [1.0.4] - 2024-04-11
 
 ### Fixed
@@ -34,6 +40,7 @@
 
 - initial
 
+[1.1.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.4...1.1.0
 [1.0.4]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.1...1.0.2

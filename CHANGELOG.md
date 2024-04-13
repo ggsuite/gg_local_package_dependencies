@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Execute tests after changes on windows
+
 ## [1.1.1] - 2024-04-13
 
 ### Removed
@@ -47,6 +53,7 @@
 
 - initial
 
+[Unreleased]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.1...HEAD
 [1.1.1]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.4...1.1.0
 [1.0.4]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.3...1.0.4

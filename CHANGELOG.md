@@ -1,10 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [1.1.1] - 2024-04-13
 
 ### Removed
 
 - dependency to gg\_install\_gg, remove ./check script
+- dependency pana
 
 ## [1.1.0] - 2024-04-12
 
@@ -46,7 +47,7 @@
 
 - initial
 
-[Unreleased]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.0...HEAD
+[1.1.1]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.4...1.1.0
 [1.0.4]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.2...1.0.3

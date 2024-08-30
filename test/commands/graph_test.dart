@@ -115,7 +115,10 @@ void main() {
         }
 
         expect(exception, contains('Please remove circular dependency:'));
-        expect(exception, contains('pack2 -> pack3b -> pack1 -> pack2'));
+        expect(
+          exception,
+          contains('pack1 -> pack2 -> pack3b -> pack1'),
+        );
       });
 
       test('should incorporate dev dependencies', () async {
@@ -159,8 +162,11 @@ void main() {
         });
 
         test('when a package contains an invalid pubspec.yaml', () async {
-          final d = await Directory.systemTemp.create();
-          final f = File(join(d.path, 'pubspec.yaml'));
+          final d = await Directory.systemTemp.createTemp();
+          final d0 = Directory(join(d.path, 'p0'));
+          await d0.create();
+
+          final f = File(join(d0.path, 'pubspec.yaml'));
           await f.writeAsString('no-name: pack0\n');
 
           late String exception;

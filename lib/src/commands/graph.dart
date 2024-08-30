@@ -44,7 +44,10 @@ class Graph extends DirCommand<void> {
     required GgLog ggLog,
   }) async {
     // Get a list of all direct sub directories
-    final allDirs = directory.listSync().whereType<Directory>();
+    final allDirs = directory.listSync().whereType<Directory>().toList()
+      ..sort(
+        (a, b) => a.path.compareTo(b.path),
+      );
 
     // Filter out dart packages
     final dartPackages = <Directory>[];

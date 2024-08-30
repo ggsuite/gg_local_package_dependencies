@@ -18,8 +18,8 @@ void main() {
     test('should be executable', () async {
       // Execute bin/gg_local_package_dependencies.dart and check if it prints help
       final result = await Process.run(
-        './bin/gg_local_package_dependencies.dart',
-        ['xyz'],
+        'dart',
+        ['./bin/gg_local_package_dependencies.dart', 'xyz'],
         stdoutEncoding: utf8,
         stderrEncoding: utf8,
       );

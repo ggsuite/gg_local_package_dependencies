@@ -14,6 +14,7 @@ class GgLocalPackageDependencies extends Command<dynamic> {
   GgLocalPackageDependencies({required this.ggLog}) {
     addSubcommand(Graph(ggLog: ggLog));
     addSubcommand(ProcessingList(ggLog: ggLog));
+    addSubcommand(SortedProcessingList(ggLog: ggLog));
   }
 
   /// The log function

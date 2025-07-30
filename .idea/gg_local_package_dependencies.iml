@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack0/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack0/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack0/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack1/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack1/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack1/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack2/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack2/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack2/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack3a/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack3a/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack3a/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack3b/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack3b/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/circular/pack3b/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack0/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack0/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack0/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack1/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack1/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack1/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack2/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack2/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack2/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack_dev_0/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack_dev_0/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack_dev_0/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack_dev_1/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack_dev_1/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/dev/pack_dev_1/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0a/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0a/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0a/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0b/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0b/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0b/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0c/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0c/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/duplicates/pack0c/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack0/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack0/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack0/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack01/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack01/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack01/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack011/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack011/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack011/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack012/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack012/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack012/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack02/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack02/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack02/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack03/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack03/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack03/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack031/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack031/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/hierarchical/pack031/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack0/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack0/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack0/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack1/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack1/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack1/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack2/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack2/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/sample_folder/plain/pack2/build" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Dart SDK" level="project" />
+    <orderEntry type="library" name="Dart Packages" level="project" />
+  </component>
+</module>

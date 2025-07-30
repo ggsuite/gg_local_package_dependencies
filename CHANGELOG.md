@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Add sorted processing list
+
 ## [1.1.2] - 2024-08-30
 
 ### Changed
@@ -53,6 +59,7 @@
 
 - initial
 
+[Unreleased]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.2...HEAD
 [1.1.2]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.4...1.1.0

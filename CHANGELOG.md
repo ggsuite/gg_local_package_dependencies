@@ -1,10 +1,16 @@
 # Changelog
 
-## [Unreleased]
+## \[1.1.3\] - 2025-08-08
 
 ### Added
 
 - Add sorted processing list
+
+## [Unreleased]
+
+### Changed
+
+- prepare for publishing 1.1.3
 
 ## [1.1.2] - 2024-08-30
 

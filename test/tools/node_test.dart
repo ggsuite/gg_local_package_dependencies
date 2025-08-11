@@ -19,10 +19,7 @@ void main() {
       final node = Node(
         name: 'name',
         directory: d,
-        pubspec: Pubspec(
-          'name',
-          version: Version(1, 0, 0),
-        ),
+        pubspec: Pubspec('name', version: Version(1, 0, 0)),
       );
 
       expect(node.name, 'name');

@@ -41,7 +41,7 @@ void main() {
 
         expect(
           messages.last,
-          contains('Could not find an option named xyz.'),
+          contains('Could not find an option named --xyz.'),
         );
       });
     });

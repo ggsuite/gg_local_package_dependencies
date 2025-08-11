@@ -6,6 +6,10 @@
 
 - Add sorted processing list
 
+### Changed
+
+- Update to latest SDK, add .gitattributes
+
 ## [1.1.2] - 2024-08-30
 
 ### Changed

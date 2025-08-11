@@ -31,8 +31,7 @@ void main() {
     });
 
     group('main cases', () {
-      group(
-          'should return a sorted processing list of all dart packages '
+      group('should return a sorted processing list of all dart packages '
           'in a folder', () {
         test('programmatically', () async {
           final result = await sortedProcessingList.get(

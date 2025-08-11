@@ -45,9 +45,7 @@ class Graph extends DirCommand<void> {
   }) async {
     // Get a list of all direct sub directories
     final allDirs = directory.listSync().whereType<Directory>().toList()
-      ..sort(
-        (a, b) => a.path.compareTo(b.path),
-      );
+      ..sort((a, b) => a.path.compareTo(b.path));
 
     // Filter out dart packages
     final dartPackages = <Directory>[];
@@ -131,10 +129,7 @@ class Graph extends DirCommand<void> {
   void _detectCircularDependencies(Node node, List<Node> coveredNodes) {
     if (coveredNodes.contains(node)) {
       final indexOCoveredNode = coveredNodes.indexOf(node);
-      final circularNodes = [
-        ...coveredNodes.sublist(indexOCoveredNode),
-        node,
-      ];
+      final circularNodes = [...coveredNodes.sublist(indexOCoveredNode), node];
       final circularNodeNames = circularNodes.map((n) => n.name).join(' -> ');
 
       final part0 = red('Please remove circular dependency:\n');
@@ -144,10 +139,7 @@ class Graph extends DirCommand<void> {
     }
 
     for (final dependency in node.dependencies.values) {
-      _detectCircularDependencies(
-        dependency,
-        [...coveredNodes, node],
-      );
+      _detectCircularDependencies(dependency, [...coveredNodes, node]);
     }
   }
 }

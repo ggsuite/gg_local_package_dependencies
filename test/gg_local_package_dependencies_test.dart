@@ -20,8 +20,9 @@ void main() {
   group('GgLocalPackageDependencies()', () {
     // #########################################################################
     group('GgLocalPackageDependencies', () {
-      final ggLocalPackageDependencies =
-          GgLocalPackageDependencies(ggLog: messages.add);
+      final ggLocalPackageDependencies = GgLocalPackageDependencies(
+        ggLog: messages.add,
+      );
 
       // .......................................................................
       test('should show all sub commands', () async {

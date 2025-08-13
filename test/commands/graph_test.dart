@@ -117,10 +117,7 @@ void main() {
         }
 
         expect(exception, contains('Please remove circular dependency:'));
-        expect(
-          exception,
-          contains('pack1 -> pack2 -> pack3b -> pack1'),
-        );
+        expect(exception, contains('pack1 -> pack2 -> pack3b -> pack1'));
       });
 
       test('should incorporate dev dependencies', () async {

@@ -11,11 +11,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 /// A node in the dependency graph
 class Node {
   /// Constructor
-  Node({
-    required this.name,
-    required this.directory,
-    required this.pubspec,
-  });
+  Node({required this.name, required this.directory, required this.pubspec});
 
   /// The name of the node
   final String name;

@@ -157,9 +157,7 @@ class Graph extends DirCommand<void> {
     final resultSet = <Node>{};
 
     // Create a deterministic copy of allowed for neighbor filtering
-    final allowedByName = {
-      for (final n in allowed) n.name: n,
-    };
+    final allowedByName = {for (final n in allowed) n.name: n};
 
     // Iterate over all unordered pairs (i < j)
     for (var i = 0; i < endpoints.length; i++) {
@@ -168,10 +166,11 @@ class Graph extends DirCommand<void> {
         final b = endpoints[j];
 
         // Direction 1: dependencies only from A to B
-        List<Node> depsNeighbors(Node n) => n.dependencies.values
-            .where((x) => allowedByName.containsKey(x.name))
-            .toList()
-          ..sort((l, r) => l.name.compareTo(r.name));
+        List<Node> depsNeighbors(Node n) =>
+            n.dependencies.values
+                .where((x) => allowedByName.containsKey(x.name))
+                .toList()
+              ..sort((l, r) => l.name.compareTo(r.name));
 
         final pathsDeps = _allSimpleDirectedPaths(
           start: a,
@@ -185,10 +184,11 @@ class Graph extends DirCommand<void> {
         }
 
         // Direction 2: dependents only from A to B
-        List<Node> parentsNeighbors(Node n) => n.dependents.values
-            .where((x) => allowedByName.containsKey(x.name))
-            .toList()
-          ..sort((l, r) => l.name.compareTo(r.name));
+        List<Node> parentsNeighbors(Node n) =>
+            n.dependents.values
+                .where((x) => allowedByName.containsKey(x.name))
+                .toList()
+              ..sort((l, r) => l.name.compareTo(r.name));
 
         final pathsParents = _allSimpleDirectedPaths(
           start: a,
@@ -203,10 +203,7 @@ class Graph extends DirCommand<void> {
       }
     }
 
-    final result = resultSet.toList()
-      ..sort(
-        (l, r) => l.name.compareTo(r.name),
-      );
+    final result = resultSet.toList()..sort((l, r) => l.name.compareTo(r.name));
     return result;
   }
 

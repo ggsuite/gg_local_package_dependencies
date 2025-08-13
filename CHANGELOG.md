@@ -8,6 +8,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add test for getNodesBetween
+
 ### Changed
 
 - prepare for publishing 1.1.3

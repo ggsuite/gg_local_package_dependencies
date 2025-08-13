@@ -241,18 +241,20 @@ void main() {
       expect(between, isEmpty);
     });
 
-    test('siblings or mixed-direction-only unreachable pairs yield empty',
-        () async {
-      final roots = await localGraph.get(directory: d, ggLog: (_) {});
-      final all = collectAllNodes(roots);
+    test(
+      'siblings or mixed-direction-only unreachable pairs yield empty',
+      () async {
+        final roots = await localGraph.get(directory: d, ggLog: (_) {});
+        final all = collectAllNodes(roots);
 
-      final pack011 = all['pack011']!;
-      final pack012 = all['pack012']!;
-      final pack031 = all['pack031']!;
+        final pack011 = all['pack011']!;
+        final pack012 = all['pack012']!;
+        final pack031 = all['pack031']!;
 
-      expect(localGraph.getNodesBetween(all, [pack011, pack012]), isEmpty);
-      expect(localGraph.getNodesBetween(all, [pack011, pack031]), isEmpty);
-    });
+        expect(localGraph.getNodesBetween(all, [pack011, pack012]), isEmpty);
+        expect(localGraph.getNodesBetween(all, [pack011, pack031]), isEmpty);
+      },
+    );
 
     test('multiple endpoints union of inner nodes', () async {
       final roots = await localGraph.get(directory: d, ggLog: (_) {});
@@ -262,10 +264,11 @@ void main() {
       final pack011 = all['pack011']!;
       final pack031 = all['pack031']!;
 
-      final between = localGraph.getNodesBetween(
-        all,
-        [pack0, pack011, pack031],
-      );
+      final between = localGraph.getNodesBetween(all, [
+        pack0,
+        pack011,
+        pack031,
+      ]);
       final names = between.map((e) => e.name).toList();
       expect(names, ['pack01', 'pack03']);
     });
@@ -308,7 +311,7 @@ void main() {
       D.dependents['C'] = C;
 
       final all = {
-        for (final n in [A, B, C, D]) n.name: n
+        for (final n in [A, B, C, D]) n.name: n,
       };
 
       final between = localGraph.getNodesBetween(all, [A, D]);
@@ -353,7 +356,7 @@ void main() {
       D.dependents['C'] = C;
 
       final all = {
-        for (final n in [A, B, C, D]) n.name: n
+        for (final n in [A, B, C, D]) n.name: n,
       };
 
       final between = localGraph.getNodesBetween(all, [B, C]);
@@ -391,7 +394,7 @@ void main() {
       y2.dependents['Y1'] = y1;
 
       final all = {
-        for (final n in [x1, x2, y1, y2]) n.name: n
+        for (final n in [x1, x2, y1, y2]) n.name: n,
       };
 
       final between = localGraph.getNodesBetween(all, [x1, y2]);
@@ -435,12 +438,29 @@ void main() {
       D.dependents['C'] = C;
 
       final all = {
-        for (final n in [A, B, C, D]) n.name: n
+        for (final n in [A, B, C, D]) n.name: n,
       };
 
       final between = localGraph.getNodesBetween(all, [A, D, D, A]);
       final names = between.map((e) => e.name).toList();
       expect(names, ['B', 'C']);
+    });
+
+    test('empty endpoints list returns empty', () async {
+      // Covers early return when endpoints length < 2
+      final roots = await localGraph.get(directory: d, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+      final between = localGraph.getNodesBetween(all, []);
+      expect(between, isEmpty);
+    });
+
+    test('single endpoint returns empty', () async {
+      // Covers early return when endpoints length < 2
+      final roots = await localGraph.get(directory: d, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+      final pack0 = all['pack0']!;
+      final between = localGraph.getNodesBetween(all, [pack0]);
+      expect(between, isEmpty);
     });
   });
 }

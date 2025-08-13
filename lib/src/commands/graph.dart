@@ -140,7 +140,20 @@ class Graph extends DirCommand<void> {
     List<Node> givenNodes,
   ) {
     // Filter to nodes contained in allNodes and remove duplicates by identity
-    final allowed = allNodes.values.toSet();
+    // Collect all unique nodes
+    final allowed = <Node>{};
+    void collect(Node node) {
+      if (allowed.contains(node)) return;
+      allowed.add(node);
+      for (final dep in node.dependencies.values) {
+        collect(dep);
+      }
+    }
+
+    for (final root in allNodes.values) {
+      collect(root);
+    }
+
     final endpoints = <Node>[];
     final seen = <Node>{};
     for (final n in givenNodes) {

@@ -10,6 +10,8 @@ import 'package:args/command_runner.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 
 void main() {
   final d = Directory(join('test', 'sample_folder', 'hierarchical'));
@@ -178,6 +180,270 @@ void main() {
           expect(exception, contains('Error parsing pubspec.yaml'));
         });
       });
+    });
+  });
+
+  // ###########################################################################
+  group('getNodesBetween', () {
+    late Graph localGraph;
+
+    setUp(() async {
+      localGraph = Graph(ggLog: (_) {});
+    });
+
+    // Helper to collect all nodes reachable via dependencies from roots
+    Map<String, Node> collectAllNodes(Map<String, Node> roots) {
+      final map = <String, Node>{};
+      void dfs(Node n) {
+        if (map.containsKey(n.name)) return;
+        map[n.name] = n;
+        for (final dep in n.dependencies.values) {
+          dfs(dep);
+        }
+      }
+
+      for (final r in roots.values) {
+        dfs(r);
+      }
+
+      return map;
+    }
+
+    test('hierarchy downward (dependencies only)', () async {
+      final roots = await localGraph.get(directory: d, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+
+      final pack0 = all['pack0']!;
+      final pack011 = all['pack011']!;
+
+      final between = localGraph.getNodesBetween(all, [pack0, pack011]);
+      final names = between.map((e) => e.name).toList();
+      expect(names, ['pack01']);
+    });
+
+    test('hierarchy upward (dependents only)', () async {
+      final roots = await localGraph.get(directory: d, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+
+      final pack0 = all['pack0']!;
+      final pack011 = all['pack011']!;
+
+      final between = localGraph.getNodesBetween(all, [pack011, pack0]);
+      final names = between.map((e) => e.name).toList();
+      expect(names, ['pack01']);
+    });
+
+    test('direct neighbors produce empty result', () async {
+      final roots = await localGraph.get(directory: d, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+
+      final pack03 = all['pack03']!;
+      final pack031 = all['pack031']!;
+
+      final between = localGraph.getNodesBetween(all, [pack03, pack031]);
+      expect(between, isEmpty);
+    });
+
+    test('siblings or mixed-direction-only unreachable pairs yield empty',
+        () async {
+      final roots = await localGraph.get(directory: d, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+
+      final pack011 = all['pack011']!;
+      final pack012 = all['pack012']!;
+      final pack031 = all['pack031']!;
+
+      expect(localGraph.getNodesBetween(all, [pack011, pack012]), isEmpty);
+      expect(localGraph.getNodesBetween(all, [pack011, pack031]), isEmpty);
+    });
+
+    test('multiple endpoints union of inner nodes', () async {
+      final roots = await localGraph.get(directory: d, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+
+      final pack0 = all['pack0']!;
+      final pack011 = all['pack011']!;
+      final pack031 = all['pack031']!;
+
+      final between = localGraph.getNodesBetween(
+        all,
+        [pack0, pack011, pack031],
+      );
+      final names = between.map((e) => e.name).toList();
+      expect(names, ['pack01', 'pack03']);
+    });
+
+    test('diamond graph: longer and shorter paths union', () {
+      // Create synthetic nodes A, B, C, D
+      final tmp = Directory.systemTemp;
+      final A = Node(
+        name: 'A',
+        directory: tmp,
+        pubspec: Pubspec('A', version: Version(1, 0, 0)),
+      );
+      final B = Node(
+        name: 'B',
+        directory: tmp,
+        pubspec: Pubspec('B', version: Version(1, 0, 0)),
+      );
+      final C = Node(
+        name: 'C',
+        directory: tmp,
+        pubspec: Pubspec('C', version: Version(1, 0, 0)),
+      );
+      final D = Node(
+        name: 'D',
+        directory: tmp,
+        pubspec: Pubspec('D', version: Version(1, 0, 0)),
+      );
+
+      // A -> B -> D, A -> C -> D
+      A.dependencies['B'] = B;
+      B.dependents['A'] = A;
+
+      A.dependencies['C'] = C;
+      C.dependents['A'] = A;
+
+      B.dependencies['D'] = D;
+      D.dependents['B'] = B;
+
+      C.dependencies['D'] = D;
+      D.dependents['C'] = C;
+
+      final all = {
+        for (final n in [A, B, C, D]) n.name: n
+      };
+
+      final between = localGraph.getNodesBetween(all, [A, D]);
+      final names = between.map((e) => e.name).toList();
+      expect(names, ['B', 'C']);
+    });
+
+    test('diamond graph: siblings B and C have no single-direction path', () {
+      final tmp = Directory.systemTemp;
+      final A = Node(
+        name: 'A',
+        directory: tmp,
+        pubspec: Pubspec('A', version: Version(1, 0, 0)),
+      );
+      final B = Node(
+        name: 'B',
+        directory: tmp,
+        pubspec: Pubspec('B', version: Version(1, 0, 0)),
+      );
+      final C = Node(
+        name: 'C',
+        directory: tmp,
+        pubspec: Pubspec('C', version: Version(1, 0, 0)),
+      );
+      final D = Node(
+        name: 'D',
+        directory: tmp,
+        pubspec: Pubspec('D', version: Version(1, 0, 0)),
+      );
+
+      // A -> B -> D, A -> C -> D
+      A.dependencies['B'] = B;
+      B.dependents['A'] = A;
+
+      A.dependencies['C'] = C;
+      C.dependents['A'] = A;
+
+      B.dependencies['D'] = D;
+      D.dependents['B'] = B;
+
+      C.dependencies['D'] = D;
+      D.dependents['C'] = C;
+
+      final all = {
+        for (final n in [A, B, C, D]) n.name: n
+      };
+
+      final between = localGraph.getNodesBetween(all, [B, C]);
+      expect(between, isEmpty);
+    });
+
+    test('disjoint roots return empty', () {
+      final tmp = Directory.systemTemp;
+      final x1 = Node(
+        name: 'X1',
+        directory: tmp,
+        pubspec: Pubspec('X1', version: Version(1, 0, 0)),
+      );
+      final x2 = Node(
+        name: 'X2',
+        directory: tmp,
+        pubspec: Pubspec('X2', version: Version(1, 0, 0)),
+      );
+      final y1 = Node(
+        name: 'Y1',
+        directory: tmp,
+        pubspec: Pubspec('Y1', version: Version(1, 0, 0)),
+      );
+      final y2 = Node(
+        name: 'Y2',
+        directory: tmp,
+        pubspec: Pubspec('Y2', version: Version(1, 0, 0)),
+      );
+
+      // X1 -> X2, Y1 -> Y2
+      x1.dependencies['X2'] = x2;
+      x2.dependents['X1'] = x1;
+
+      y1.dependencies['Y2'] = y2;
+      y2.dependents['Y1'] = y1;
+
+      final all = {
+        for (final n in [x1, x2, y1, y2]) n.name: n
+      };
+
+      final between = localGraph.getNodesBetween(all, [x1, y2]);
+      expect(between, isEmpty);
+    });
+
+    test('duplicate endpoints are ignored', () {
+      final tmp = Directory.systemTemp;
+      final A = Node(
+        name: 'A',
+        directory: tmp,
+        pubspec: Pubspec('A', version: Version(1, 0, 0)),
+      );
+      final B = Node(
+        name: 'B',
+        directory: tmp,
+        pubspec: Pubspec('B', version: Version(1, 0, 0)),
+      );
+      final C = Node(
+        name: 'C',
+        directory: tmp,
+        pubspec: Pubspec('C', version: Version(1, 0, 0)),
+      );
+      final D = Node(
+        name: 'D',
+        directory: tmp,
+        pubspec: Pubspec('D', version: Version(1, 0, 0)),
+      );
+
+      // A -> B -> D, A -> C -> D
+      A.dependencies['B'] = B;
+      B.dependents['A'] = A;
+
+      A.dependencies['C'] = C;
+      C.dependents['A'] = A;
+
+      B.dependencies['D'] = D;
+      D.dependents['B'] = B;
+
+      C.dependencies['D'] = D;
+      D.dependents['C'] = C;
+
+      final all = {
+        for (final n in [A, B, C, D]) n.name: n
+      };
+
+      final between = localGraph.getNodesBetween(all, [A, D, D, A]);
+      final names = between.map((e) => e.name).toList();
+      expect(names, ['B', 'C']);
     });
   });
 }

@@ -43,7 +43,7 @@ class ProcessingList extends DirCommand<void> {
   @override
   Future<List<Node>> get({
     required Directory directory,
-    required GgLog ggLog,
+    GgLog? ggLog,
   }) async {
     final result = <Node>[];
 

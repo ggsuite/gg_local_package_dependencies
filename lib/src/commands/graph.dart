@@ -41,7 +41,7 @@ class Graph extends DirCommand<void> {
   @override
   Future<Map<String, Node>> get({
     required Directory directory,
-    required GgLog ggLog,
+    GgLog? ggLog,
   }) async {
     // Get a list of all direct sub directories
     final allDirs = directory.listSync().whereType<Directory>().toList()

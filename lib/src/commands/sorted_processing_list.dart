@@ -41,10 +41,7 @@ class SortedProcessingList extends DirCommand<void> {
   // ...........................................................................
   /// Returns a list of all nodes in processing order
   @override
-  Future<List<Node>> get({
-    required Directory directory,
-    GgLog? ggLog,
-  }) async {
+  Future<List<Node>> get({required Directory directory, GgLog? ggLog}) async {
     // Get the graph
     final graph = await _graph.get(directory: directory, ggLog: ggLog);
 

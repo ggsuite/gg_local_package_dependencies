@@ -41,10 +41,7 @@ class ProcessingList extends DirCommand<void> {
   // ...........................................................................
   /// Returns a map of all root nodes in the dependency graph
   @override
-  Future<List<Node>> get({
-    required Directory directory,
-    GgLog? ggLog,
-  }) async {
+  Future<List<Node>> get({required Directory directory, GgLog? ggLog}) async {
     final result = <Node>[];
 
     // Calculate a graph

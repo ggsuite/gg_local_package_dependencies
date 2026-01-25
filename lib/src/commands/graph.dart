@@ -11,7 +11,6 @@ import 'package:gg_console_colors/gg_console_colors.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:gg_log/gg_log.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pubspec_parse/pubspec_parse.dart';
 
 // #############################################################################
 /// Returns dependency graph of packages in a local folder.
@@ -22,7 +21,16 @@ class Graph extends DirCommand<void> {
     super.name = 'graph',
     super.description =
         'Returns dependency graph of packages in a local folder.',
-  });
+    List<PackageLanguage>? languages,
+  }) : languages =
+           languages ??
+           <PackageLanguage>[
+             DartPackageLanguage(),
+             TypeScriptPackageLanguage(),
+           ];
+
+  /// Supported package languages used for discovery within folders.
+  final List<PackageLanguage> languages;
 
   // ...........................................................................
   @override
@@ -37,74 +45,70 @@ class Graph extends DirCommand<void> {
   }
 
   // ...........................................................................
-  /// Returns a map of all root nodes in the dependency graph
+  /// Returns a map of all root nodes in the dependency graph.
   @override
   Future<Map<String, Node>> get({
     required Directory directory,
     GgLog? ggLog,
   }) async {
-    // Get a list of all direct sub directories
+    // Get a list of all direct sub directories.
     final allDirs = directory.listSync().whereType<Directory>().toList()
       ..sort((a, b) => a.path.compareTo(b.path));
 
-    // Filter out dart packages
-    final dartPackages = <Directory>[];
-    for (final dir in allDirs) {
-      final pubspec = File('${dir.path}/pubspec.yaml');
-      if (await pubspec.exists()) {
-        dartPackages.add(dir);
-      }
-    }
-
-    // Create a dictionary of name to node
+    // Create a dictionary of name to node.
     final nodes = <String, Node>{};
-    for (final dartPackage in dartPackages) {
-      final pubspec = File('${dartPackage.path}/pubspec.yaml');
-      final pubspecContent = await pubspec.readAsString();
-      late Pubspec pubspecYaml;
-      try {
-        pubspecYaml = Pubspec.parse(pubspecContent);
-      } catch (e) {
-        throw Exception(red('Error parsing pubspec.yaml:') + e.toString());
-      }
-      final node = Node(
-        name: pubspecYaml.name,
-        directory: dartPackage,
-        pubspec: pubspecYaml,
-      );
 
-      if (nodes.containsKey(node.name)) {
-        throw Exception('Duplicate package name: ${node.name}');
-      }
+    for (final dir in allDirs) {
+      for (final language in languages) {
+        if (!language.isPackageDirectory(dir)) {
+          continue;
+        }
 
-      nodes[node.name] = node;
+        final manifest = await language.loadManifest(dir);
+        final node = Node(
+          name: manifest.name,
+          directory: dir,
+          manifest: manifest,
+        );
+
+        if (nodes.containsKey(node.name)) {
+          throw Exception('Duplicate package name: ${node.name}');
+        }
+
+        nodes[node.name] = node;
+
+        // A directory should be handled by at most one language, so stop
+        // iterating languages once a match is found.
+        break;
+      }
     }
 
-    // Estimate dependencies of all nodes
+    // Estimate dependencies of all nodes.
     for (final node in nodes.values) {
-      // Iterate all dependencies
-      final keys = [
-        ...node.pubspec.dependencies.keys,
-        ...node.pubspec.devDependencies.keys,
+      final dependencyNames = <String>[
+        ...node.manifest.dependencies,
+        ...node.manifest.devDependencies,
       ];
 
-      for (final dependency in keys) {
+      for (final dependency in dependencyNames) {
         // Is the dependency locally found?
         final isFound = nodes.containsKey(dependency);
-        if (!isFound) continue;
+        if (!isFound) {
+          continue;
+        }
 
-        // Get the dependent node
+        // Get the dependent node.
         final dependentNode = nodes[dependency]!;
 
-        // Add the dependency to the dependencies list
+        // Add the dependency to the dependencies list.
         node.dependencies[dependency] = dependentNode;
 
-        // Add this node to the dependents list of the dependent node
+        // Add this node to the dependents list of the dependent node.
         dependentNode.dependents[node.name] = node;
       }
     }
 
-    // Detect circular dependencies
+    // Detect circular dependencies.
     final coveredNodes = <Node>[];
     for (final node in nodes.values) {
       _detectCircularDependencies(node, coveredNodes);
@@ -113,7 +117,9 @@ class Graph extends DirCommand<void> {
     // We want only root nodes.
     // A root node is a node that has no dependents.
     final rootNodes = nodes.values.where((node) => node.dependents.isEmpty);
-    Map<String, Node> result = {for (var item in rootNodes) item.name: item};
+    final result = <String, Node>{
+      for (final item in rootNodes) item.name: item,
+    };
     return result;
   }
 
@@ -143,7 +149,9 @@ class Graph extends DirCommand<void> {
     // Collect all unique nodes
     final allowed = <Node>{};
     void collect(Node node) {
-      if (allowed.contains(node)) return;
+      if (allowed.contains(node)) {
+        return;
+      }
       allowed.add(node);
       for (final dep in node.dependencies.values) {
         collect(dep);
@@ -157,8 +165,12 @@ class Graph extends DirCommand<void> {
     final endpoints = <Node>[];
     final seen = <Node>{};
     for (final n in givenNodes) {
-      if (!allowed.contains(n)) continue;
-      if (seen.contains(n)) continue;
+      if (!allowed.contains(n)) {
+        continue;
+      }
+      if (seen.contains(n)) {
+        continue;
+      }
       seen.add(n);
       endpoints.add(n);
     }
@@ -169,16 +181,16 @@ class Graph extends DirCommand<void> {
 
     final resultSet = <Node>{};
 
-    // Create a deterministic copy of allowed for neighbor filtering
+    // Create a deterministic copy of allowed for neighbor filtering.
     final allowedByName = {for (final n in allowed) n.name: n};
 
-    // Iterate over all unordered pairs (i < j)
+    // Iterate over all unordered pairs (i < j).
     for (var i = 0; i < endpoints.length; i++) {
       for (var j = i + 1; j < endpoints.length; j++) {
         final a = endpoints[i];
         final b = endpoints[j];
 
-        // Direction 1: dependencies only from A to B
+        // Direction 1: dependencies only from A to B.
         List<Node> depsNeighbors(Node n) =>
             n.dependencies.values
                 .where((x) => allowedByName.containsKey(x.name))
@@ -196,7 +208,7 @@ class Graph extends DirCommand<void> {
           _addInnerNodesToSet(p, resultSet);
         }
 
-        // Direction 2: dependents only from A to B
+        // Direction 2: dependents only from A to B.
         List<Node> parentsNeighbors(Node n) =>
             n.dependents.values
                 .where((x) => allowedByName.containsKey(x.name))
@@ -264,14 +276,19 @@ class Graph extends DirCommand<void> {
 
     void dfs(Node current, List<Node> path, Set<Node> onPath) {
       if (identical(current, end)) {
-        // Store a copy of the current path
+        // Store a copy of the current path.
         paths.add(List<Node>.from(path));
         return;
       }
 
       for (final next in neighbors(current)) {
-        if (!allowed.contains(next)) continue;
-        if (onPath.contains(next)) continue; // avoid cycles on the current path
+        if (!allowed.contains(next)) {
+          continue;
+        }
+        if (onPath.contains(next)) {
+          // Avoid cycles on the current path.
+          continue;
+        }
         onPath.add(next);
         path.add(next);
         dfs(next, path, onPath);
@@ -287,12 +304,15 @@ class Graph extends DirCommand<void> {
   // ...........................................................................
   /// Adds all inner nodes of the path (without first and last) to [set].
   void _addInnerNodesToSet(List<Node> path, Set<Node> set) {
-    if (path.length <= 2) return; // direct neighbors or identical
+    if (path.length <= 2) {
+      // Direct neighbors or identical.
+      return;
+    }
     for (var i = 1; i < path.length - 1; i++) {
       set.add(path[i]);
     }
   }
 }
 
-/// Mock of Graph
+/// Mock of Graph.
 class MockGraph extends Mock implements Graph {}

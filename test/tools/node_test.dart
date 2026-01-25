@@ -7,9 +7,21 @@
 import 'dart:io';
 
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
-import 'package:pub_semver/pub_semver.dart';
-import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:test/test.dart';
+
+/// Simple test manifest implementation.
+class _TestManifest implements PackageManifest {
+  _TestManifest(this.name);
+
+  @override
+  final String name;
+
+  @override
+  Iterable<String> get dependencies => const <String>[];
+
+  @override
+  Iterable<String> get devDependencies => const <String>[];
+}
 
 void main() {
   final d = Directory.systemTemp;
@@ -19,13 +31,14 @@ void main() {
       final node = Node(
         name: 'name',
         directory: d,
-        pubspec: Pubspec('name', version: Version(1, 0, 0)),
+        manifest: _TestManifest('name'),
       );
 
       expect(node.name, 'name');
       expect(node.directory, d);
       expect(node.dependencies, <String, Node>{});
-      expect(node.dependencies, <String, Node>{});
+      expect(node.dependents, <String, Node>{});
+      expect(node.manifest.name, 'name');
       expect(node.toString(), 'Node{name: name, dependencies: {}}');
     });
   });

@@ -15,6 +15,7 @@
 ### Changed
 
 - prepare for publishing 1.1.3
+- kidney: changed references to git
 
 ## [1.1.2] - 2024-08-30
 

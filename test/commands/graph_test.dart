@@ -10,8 +10,20 @@ import 'package:args/command_runner.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
-import 'package:pub_semver/pub_semver.dart';
-import 'package:pubspec_parse/pubspec_parse.dart';
+
+/// Simple test manifest implementation used for synthetic node graphs.
+class _TestManifest implements PackageManifest {
+  _TestManifest(this.name);
+
+  @override
+  final String name;
+
+  @override
+  Iterable<String> get dependencies => const <String>[];
+
+  @override
+  Iterable<String> get devDependencies => const <String>[];
+}
 
 void main() {
   final d = Directory(join('test', 'sample_folder', 'hierarchical'));
@@ -19,6 +31,15 @@ void main() {
   final dDuplicate = Directory(join('test', 'sample_folder', 'duplicates'));
   final dCircular = Directory(join('test', 'sample_folder', 'circular'));
   final dDev = Directory(join('test', 'sample_folder', 'dev'));
+
+  final dTs = Directory(join('test', 'sample_folder_ts', 'hierarchical'));
+  final dPlainTs = Directory(join('test', 'sample_folder_ts', 'plain'));
+  final dDuplicateTs = Directory(
+    join('test', 'sample_folder_ts', 'duplicates'),
+  );
+  final dCircularTs = Directory(join('test', 'sample_folder_ts', 'circular'));
+  final dDevTs = Directory(join('test', 'sample_folder_ts', 'dev'));
+
   late Graph graph;
   final messages = <String>[];
   final ggLog = messages.add;
@@ -27,6 +48,7 @@ void main() {
   // ...........................................................................
   setUp(() async {
     expect(await d.exists(), isTrue);
+    expect(await dTs.exists(), isTrue);
     messages.clear();
     runner = CommandRunner<void>('test', 'test');
     graph = Graph(ggLog: ggLog);
@@ -59,7 +81,7 @@ void main() {
           expect(pack01.dependents.keys, {'pack0'});
           expect(pack01.dependencies.keys, {'pack011', 'pack012'});
 
-          // pack01
+          // pack02
           final pack02 = pack0.dependencies['pack02']!;
           expect(pack02.name, 'pack02');
           expect(pack02.directory.path, join(d.path, 'pack02'));
@@ -106,6 +128,74 @@ void main() {
           expect(messages[5], '  pack03');
           expect(messages[6], '    pack031');
         });
+
+        test('programmatically TypeScript', () async {
+          final result = await graph.get(directory: dTs, ggLog: ggLog);
+          expect(result.length, 1);
+          expect(result.keys, {'pack0'});
+
+          // pack0
+          final pack0 = result['pack0']!;
+          expect(pack0.name, 'pack0');
+          expect(pack0.directory.path, join(dTs.path, 'pack0'));
+          expect(pack0.dependents, isEmpty);
+          expect(pack0.dependencies.keys, {'pack01', 'pack02', 'pack03'});
+
+          // ......
+          // pack01
+          final pack01 = pack0.dependencies['pack01']!;
+          expect(pack01.name, 'pack01');
+          expect(pack01.directory.path, join(dTs.path, 'pack01'));
+          expect(pack01.dependents.keys, {'pack0'});
+          expect(pack01.dependencies.keys, {'pack011', 'pack012'});
+
+          // pack02
+          final pack02 = pack0.dependencies['pack02']!;
+          expect(pack02.name, 'pack02');
+          expect(pack02.directory.path, join(dTs.path, 'pack02'));
+          expect(pack02.dependents.keys, {'pack0'});
+          expect(pack02.dependencies, isEmpty);
+
+          // pack03
+          final pack03 = pack0.dependencies['pack03']!;
+          expect(pack03.name, 'pack03');
+          expect(pack03.directory.path, join(dTs.path, 'pack03'));
+          expect(pack03.dependents.keys, {'pack0'});
+          expect(pack03.dependencies.keys, {'pack031'});
+
+          // .......
+          // pack011
+          final pack011 = pack01.dependencies['pack011']!;
+          expect(pack011.name, 'pack011');
+          expect(pack011.directory.path, join(dTs.path, 'pack011'));
+          expect(pack011.dependents.keys, {'pack01'});
+          expect(pack011.dependencies, isEmpty);
+
+          // pack012
+          final pack012 = pack01.dependencies['pack012']!;
+          expect(pack012.name, 'pack012');
+          expect(pack012.directory.path, join(dTs.path, 'pack012'));
+          expect(pack012.dependents.keys, {'pack01'});
+          expect(pack012.dependencies, isEmpty);
+
+          // pack031
+          final pack031 = pack03.dependencies['pack031']!;
+          expect(pack031.name, 'pack031');
+          expect(pack031.directory.path, join(dTs.path, 'pack031'));
+          expect(pack031.dependents.keys, {'pack03'});
+          expect(pack031.dependencies, isEmpty);
+        });
+
+        test('via CLI TypeScript', () async {
+          await runner.run(['graph', '-i', dTs.path]);
+          expect(messages[0], 'pack0');
+          expect(messages[1], '  pack01');
+          expect(messages[2], '    pack011');
+          expect(messages[3], '    pack012');
+          expect(messages[4], '  pack02');
+          expect(messages[5], '  pack03');
+          expect(messages[6], '    pack031');
+        });
       });
 
       test('should complain about circular dependencies', () async {
@@ -120,8 +210,36 @@ void main() {
         expect(exception, contains('pack1 -> pack2 -> pack3b -> pack1'));
       });
 
+      test(
+        'should complain about circular dependencies for TypeScript',
+        () async {
+          late String exception;
+          try {
+            await graph.get(directory: dCircularTs, ggLog: ggLog);
+          } catch (e) {
+            exception = e.toString();
+          }
+
+          expect(exception, contains('Please remove circular dependency:'));
+          expect(exception, contains('pack1 -> pack2 -> pack3b -> pack1'));
+        },
+      );
+
       test('should incorporate dev dependencies', () async {
         final result = await graph.get(directory: dDev, ggLog: ggLog);
+
+        final names = result.keys.toList()..sort();
+        expect(names, ['pack0', 'pack1', 'pack2']);
+
+        final pack1 = result['pack1']!;
+        expect(pack1.dependencies.keys.toList()..sort(), ['pack_dev_0']);
+
+        final packDev0 = pack1.dependencies['pack_dev_0']!;
+        expect(packDev0.dependencies.keys.toList()..sort(), ['pack_dev_1']);
+      });
+
+      test('should incorporate dev dependencies for TypeScript', () async {
+        final result = await graph.get(directory: dDevTs, ggLog: ggLog);
 
         final names = result.keys.toList()..sort();
         expect(names, ['pack0', 'pack1', 'pack2']);
@@ -144,11 +262,36 @@ void main() {
         },
       );
 
+      test(
+        'folder does contain a plain list of independent TypeScript packages',
+        () async {
+          final result = await graph.get(directory: dPlainTs, ggLog: ggLog);
+
+          final names = result.keys.toList()..sort();
+          expect(names, ['pack0', 'pack1', 'pack2']);
+        },
+      );
+
       group('should throw', () {
         test('when multiple packages have the same name', () async {
           late Exception exception;
           try {
             await graph.get(directory: dDuplicate, ggLog: ggLog);
+          } catch (e) {
+            exception = e as Exception;
+          }
+
+          expect(exception, isA<Exception>());
+          expect(
+            exception.toString(),
+            'Exception: Duplicate package name: pack0',
+          );
+        });
+
+        test('when multiple TypeScript packages have the same name', () async {
+          late Exception exception;
+          try {
+            await graph.get(directory: dDuplicateTs, ggLog: ggLog);
           } catch (e) {
             exception = e as Exception;
           }
@@ -176,6 +319,26 @@ void main() {
           }
           expect(exception, contains('Error parsing pubspec.yaml'));
         });
+
+        test(
+          'when a TypeScript package contains an invalid package.json',
+          () async {
+            final d = await Directory.systemTemp.createTemp();
+            final d0 = Directory(join(d.path, 'p0'));
+            await d0.create();
+
+            final f = File(join(d0.path, 'package.json'));
+            await f.writeAsString('{ invalid json');
+
+            late String exception;
+            try {
+              await graph.get(directory: d, ggLog: ggLog);
+            } catch (e) {
+              exception = e.toString();
+            }
+            expect(exception, contains('Error parsing package.json'));
+          },
+        );
       });
     });
   });
@@ -188,11 +351,13 @@ void main() {
       localGraph = Graph(ggLog: (_) {});
     });
 
-    // Helper to collect all nodes reachable via dependencies from roots
+    // Helper to collect all nodes reachable via dependencies from roots.
     Map<String, Node> collectAllNodes(Map<String, Node> roots) {
       final map = <String, Node>{};
       void dfs(Node n) {
-        if (map.containsKey(n.name)) return;
+        if (map.containsKey(n.name)) {
+          return;
+        }
         map[n.name] = n;
         for (final dep in n.dependencies.values) {
           dfs(dep);
@@ -274,30 +439,14 @@ void main() {
     });
 
     test('diamond graph: longer and shorter paths union', () {
-      // Create synthetic nodes A, B, C, D
+      // Create synthetic nodes A, B, C, D.
       final tmp = Directory.systemTemp;
-      final A = Node(
-        name: 'A',
-        directory: tmp,
-        pubspec: Pubspec('A', version: Version(1, 0, 0)),
-      );
-      final B = Node(
-        name: 'B',
-        directory: tmp,
-        pubspec: Pubspec('B', version: Version(1, 0, 0)),
-      );
-      final C = Node(
-        name: 'C',
-        directory: tmp,
-        pubspec: Pubspec('C', version: Version(1, 0, 0)),
-      );
-      final D = Node(
-        name: 'D',
-        directory: tmp,
-        pubspec: Pubspec('D', version: Version(1, 0, 0)),
-      );
+      final A = Node(name: 'A', directory: tmp, manifest: _TestManifest('A'));
+      final B = Node(name: 'B', directory: tmp, manifest: _TestManifest('B'));
+      final C = Node(name: 'C', directory: tmp, manifest: _TestManifest('C'));
+      final D = Node(name: 'D', directory: tmp, manifest: _TestManifest('D'));
 
-      // A -> B -> D, A -> C -> D
+      // A -> B -> D, A -> C -> D.
       A.dependencies['B'] = B;
       B.dependents['A'] = A;
 
@@ -321,28 +470,12 @@ void main() {
 
     test('diamond graph: siblings B and C have no single-direction path', () {
       final tmp = Directory.systemTemp;
-      final A = Node(
-        name: 'A',
-        directory: tmp,
-        pubspec: Pubspec('A', version: Version(1, 0, 0)),
-      );
-      final B = Node(
-        name: 'B',
-        directory: tmp,
-        pubspec: Pubspec('B', version: Version(1, 0, 0)),
-      );
-      final C = Node(
-        name: 'C',
-        directory: tmp,
-        pubspec: Pubspec('C', version: Version(1, 0, 0)),
-      );
-      final D = Node(
-        name: 'D',
-        directory: tmp,
-        pubspec: Pubspec('D', version: Version(1, 0, 0)),
-      );
+      final A = Node(name: 'A', directory: tmp, manifest: _TestManifest('A'));
+      final B = Node(name: 'B', directory: tmp, manifest: _TestManifest('B'));
+      final C = Node(name: 'C', directory: tmp, manifest: _TestManifest('C'));
+      final D = Node(name: 'D', directory: tmp, manifest: _TestManifest('D'));
 
-      // A -> B -> D, A -> C -> D
+      // A -> B -> D, A -> C -> D.
       A.dependencies['B'] = B;
       B.dependents['A'] = A;
 
@@ -368,25 +501,25 @@ void main() {
       final x1 = Node(
         name: 'X1',
         directory: tmp,
-        pubspec: Pubspec('X1', version: Version(1, 0, 0)),
+        manifest: _TestManifest('X1'),
       );
       final x2 = Node(
         name: 'X2',
         directory: tmp,
-        pubspec: Pubspec('X2', version: Version(1, 0, 0)),
+        manifest: _TestManifest('X2'),
       );
       final y1 = Node(
         name: 'Y1',
         directory: tmp,
-        pubspec: Pubspec('Y1', version: Version(1, 0, 0)),
+        manifest: _TestManifest('Y1'),
       );
       final y2 = Node(
         name: 'Y2',
         directory: tmp,
-        pubspec: Pubspec('Y2', version: Version(1, 0, 0)),
+        manifest: _TestManifest('Y2'),
       );
 
-      // X1 -> X2, Y1 -> Y2
+      // X1 -> X2, Y1 -> Y2.
       x1.dependencies['X2'] = x2;
       x2.dependents['X1'] = x1;
 
@@ -403,28 +536,12 @@ void main() {
 
     test('duplicate endpoints are ignored', () {
       final tmp = Directory.systemTemp;
-      final A = Node(
-        name: 'A',
-        directory: tmp,
-        pubspec: Pubspec('A', version: Version(1, 0, 0)),
-      );
-      final B = Node(
-        name: 'B',
-        directory: tmp,
-        pubspec: Pubspec('B', version: Version(1, 0, 0)),
-      );
-      final C = Node(
-        name: 'C',
-        directory: tmp,
-        pubspec: Pubspec('C', version: Version(1, 0, 0)),
-      );
-      final D = Node(
-        name: 'D',
-        directory: tmp,
-        pubspec: Pubspec('D', version: Version(1, 0, 0)),
-      );
+      final A = Node(name: 'A', directory: tmp, manifest: _TestManifest('A'));
+      final B = Node(name: 'B', directory: tmp, manifest: _TestManifest('B'));
+      final C = Node(name: 'C', directory: tmp, manifest: _TestManifest('C'));
+      final D = Node(name: 'D', directory: tmp, manifest: _TestManifest('D'));
 
-      // A -> B -> D, A -> C -> D
+      // A -> B -> D, A -> C -> D.
       A.dependencies['B'] = B;
       B.dependents['A'] = A;
 
@@ -447,7 +564,7 @@ void main() {
     });
 
     test('empty endpoints list returns empty', () async {
-      // Covers early return when endpoints length < 2
+      // Covers early return when endpoints length < 2.
       final roots = await localGraph.get(directory: d, ggLog: (_) {});
       final all = collectAllNodes(roots);
       final between = localGraph.getNodesBetween(all, []);
@@ -455,7 +572,7 @@ void main() {
     });
 
     test('single endpoint returns empty', () async {
-      // Covers early return when endpoints length < 2
+      // Covers early return when endpoints length < 2.
       final roots = await localGraph.get(directory: d, ggLog: (_) {});
       final all = collectAllNodes(roots);
       final pack0 = all['pack0']!;

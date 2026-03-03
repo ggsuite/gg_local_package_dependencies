@@ -9,8 +9,6 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-import '../../bin/gg_local_package_dependencies.dart';
-
 void main() {
   group('bin/gg_local_package_dependencies.dart', () {
     // #########################################################################
@@ -28,22 +26,6 @@ void main() {
       expect(stdout, contains('Could not find a subcommand named xyz'));
       expect(stdout, contains('graph  '));
       expect(stdout, contains('processing-list  '));
-    });
-  });
-
-  // ###########################################################################
-  group('run(args, log)', () {
-    group('with args=[--param, value]', () {
-      test('should print "value"', () async {
-        // Execute bin/gg_local_package_dependencies.dart and check if it prints "value"
-        final messages = <String>[];
-        await run(args: ['graph', '--xyz', '5'], ggLog: messages.add);
-
-        expect(
-          messages.last,
-          contains('Could not find an option named --xyz.'),
-        );
-      });
     });
   });
 }

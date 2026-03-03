@@ -11,3 +11,4 @@ export 'src/commands/graph.dart';
 export 'src/commands/processing_list.dart';
 export 'src/commands/sorted_processing_list.dart';
 export 'src/tools/node.dart';
+export 'src/tools/package_manifest.dart';

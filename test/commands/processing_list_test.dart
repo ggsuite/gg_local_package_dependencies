@@ -16,6 +16,9 @@ void main() {
     final d = Directory(join('test', 'sample_folder', 'hierarchical'));
     final dPlain = Directory(join('test', 'sample_folder', 'plain'));
 
+    final dTs = Directory(join('test', 'sample_folder_ts', 'hierarchical'));
+    final dPlainTs = Directory(join('test', 'sample_folder_ts', 'plain'));
+
     late ProcessingList processingList;
     final messages = <String>[];
     final ggLog = messages.add;
@@ -24,6 +27,7 @@ void main() {
     // .........................................................................
     setUp(() async {
       expect(await d.exists(), isTrue);
+      expect(await dTs.exists(), isTrue);
       messages.clear();
       runner = CommandRunner<void>('test', 'test');
       processingList = ProcessingList(ggLog: ggLog);
@@ -60,6 +64,36 @@ void main() {
             expect(messages[5], 'pack03');
             expect(messages[6], 'pack0');
           });
+
+          test('programmatically TypeScript', () async {
+            final result = await processingList.get(
+              directory: dTs,
+              ggLog: ggLog,
+            );
+            expect(result.length, 7);
+            final names = result.map((e) => e.name).toList();
+            expect(names, [
+              'pack011',
+              'pack012',
+              'pack01',
+              'pack02',
+              'pack031',
+              'pack03',
+              'pack0',
+            ]);
+          });
+
+          test('via CLI TypeScript', () async {
+            await runner.run(['processing-list', '-i', dTs.path]);
+            expect(messages.length, 7);
+            expect(messages[0], 'pack011');
+            expect(messages[1], 'pack012');
+            expect(messages[2], 'pack01');
+            expect(messages[3], 'pack02');
+            expect(messages[4], 'pack031');
+            expect(messages[5], 'pack03');
+            expect(messages[6], 'pack0');
+          });
         },
       );
     });
@@ -69,6 +103,18 @@ void main() {
         () async {
           final result = await processingList.get(
             directory: dPlain,
+            ggLog: ggLog,
+          );
+          final names = result.map((e) => e.name).toList()..sort();
+          expect(names, ['pack0', 'pack1', 'pack2']);
+        },
+      );
+
+      test(
+        'folder does contain a plain list of independent TypeScript packages',
+        () async {
+          final result = await processingList.get(
+            directory: dPlainTs,
             ggLog: ggLog,
           );
           final names = result.map((e) => e.name).toList()..sort();

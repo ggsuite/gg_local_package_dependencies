@@ -6,29 +6,29 @@
 
 import 'dart:io';
 
-import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package_manifest.dart';
 
-/// A node in the dependency graph
+/// A node in the dependency graph.
 class Node {
-  /// Constructor
-  Node({required this.name, required this.directory, required this.pubspec});
+  /// Constructor.
+  Node({required this.name, required this.directory, required this.manifest});
 
-  /// The name of the node
+  /// The name of the node.
   final String name;
 
-  /// Nodes this package needs to work
+  /// Language-agnostic manifest describing this package.
+  PackageManifest manifest;
+
+  /// Nodes this package needs to work.
   final Map<String, Node> dependencies = {};
 
-  /// Nodes that need this package to work
+  /// Nodes that need this package to work.
   final Map<String, Node> dependents = {};
 
-  /// The directory of the node
+  /// The directory of the node.
   final Directory directory;
 
-  /// The parsed pubspec.yaml file
-  Pubspec pubspec;
-
-  /// The string representation of the node
+  /// The string representation of the node.
   @override
   String toString() {
     return 'Node{name: $name, dependencies: $dependencies}';

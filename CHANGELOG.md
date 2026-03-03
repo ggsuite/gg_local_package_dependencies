@@ -11,10 +11,15 @@
 ### Added
 
 - Add test for getNodesBetween
+- Add typescript support
 
 ### Changed
 
 - prepare for publishing 1.1.3
+
+### Removed
+
+- Remove unused import and outdated tests from dependencies test
 
 ## [1.1.2] - 2024-08-30
 

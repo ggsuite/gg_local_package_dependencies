@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2024 Dr. Gabriel Gatzsche. All Rights Reserved.
+// Copyright (c) 2019 - 2025 Göran Hegenberg. All Rights Reserved.
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -12,10 +12,9 @@ import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart
 import 'package:gg_log/gg_log.dart';
 import 'package:mocktail/mocktail.dart';
 
-// #############################################################################
 /// Returns dependency graph of packages in a local folder.
 class Graph extends DirCommand<void> {
-  /// Constructor
+  /// Creates the graph command.
   Graph({
     required super.ggLog,
     super.name = 'graph',
@@ -32,7 +31,6 @@ class Graph extends DirCommand<void> {
   /// Supported package languages used for discovery within folders.
   final List<PackageLanguage> languages;
 
-  // ...........................................................................
   @override
   Future<void> exec({
     required Directory directory,
@@ -44,13 +42,14 @@ class Graph extends DirCommand<void> {
     }
   }
 
-  // ...........................................................................
   /// Returns a map of all root nodes in the dependency graph.
   @override
   Future<Map<String, Node>> get({
     required Directory directory,
     GgLog? ggLog,
   }) async {
+    final log = ggLog ?? this.ggLog;
+
     // Get a list of all direct sub directories.
     final allDirs = directory.listSync().whereType<Directory>().toList()
       ..sort((a, b) => a.path.compareTo(b.path));
@@ -72,7 +71,12 @@ class Graph extends DirCommand<void> {
         );
 
         if (nodes.containsKey(node.name)) {
-          throw Exception('Duplicate package name: ${node.name}');
+          _logDuplicatePackage(
+            ggLog: log,
+            packageName: node.name,
+            packagePath: dir.path,
+          );
+          break;
         }
 
         nodes[node.name] = node;
@@ -123,7 +127,6 @@ class Graph extends DirCommand<void> {
     return result;
   }
 
-  // ...........................................................................
   /// Returns all nodes that lie between the given nodes when moving strictly
   /// along a single hierarchy direction (only dependencies or only dependents)
   /// in the dependency forest.
@@ -232,7 +235,19 @@ class Graph extends DirCommand<void> {
     return result;
   }
 
-  // ...........................................................................
+  /// Logs that a duplicate package was found and ignored.
+  void _logDuplicatePackage({
+    required GgLog ggLog,
+    required String packageName,
+    required String packagePath,
+  }) {
+    ggLog(
+      yellow('Found duplicate package name: $packageName in ') +
+          blue(packagePath),
+    );
+    ggLog(yellow("Project won't be added to dependency graph."));
+  }
+
   /// Prints a node and its dependencies using indentation for hierarchy.
   void _printNode(Node node, GgLog ggLog, int indentation) {
     ggLog(' ' * indentation * 2 + node.name);
@@ -241,7 +256,6 @@ class Graph extends DirCommand<void> {
     }
   }
 
-  // ...........................................................................
   /// Detects circular dependencies and throws an exception if a cycle is found.
   void _detectCircularDependencies(Node node, List<Node> coveredNodes) {
     if (coveredNodes.contains(node)) {
@@ -260,12 +274,7 @@ class Graph extends DirCommand<void> {
     }
   }
 
-  // ...........................................................................
-  /// Returns all simple directed paths from [start] to [end] using [neighbors]
-  /// to enumerate next nodes. Only nodes in [allowed] are traversed.
-  ///
-  /// Note: Even though the graph is typically a DAG, this DFS guards against
-  /// visiting the same node twice on the current path to avoid infinite loops.
+  /// Returns all simple directed paths from [start] to [end] using [neighbors].
   List<List<Node>> _allSimpleDirectedPaths({
     required Node start,
     required Node end,
@@ -301,7 +310,6 @@ class Graph extends DirCommand<void> {
     return paths;
   }
 
-  // ...........................................................................
   /// Adds all inner nodes of the path (without first and last) to [set].
   void _addInnerNodesToSet(List<Node> path, Set<Node> set) {
     if (path.length <= 2) {

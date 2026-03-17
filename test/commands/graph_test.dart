@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2024 Dr. Gabriel Gatzsche. All Rights Reserved.
+// Copyright (c) 2025 Göran Hegenberg. All Rights Reserved.
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -7,6 +7,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:gg_console_colors/gg_console_colors.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
@@ -45,7 +46,6 @@ void main() {
   final ggLog = messages.add;
   late CommandRunner<void> runner;
 
-  // ...........................................................................
   setUp(() async {
     expect(await d.exists(), isTrue);
     expect(await dTs.exists(), isTrue);
@@ -55,7 +55,6 @@ void main() {
     runner.addCommand(graph);
   });
 
-  // ...........................................................................
   tearDown(() {});
 
   group('Graph', () {
@@ -73,7 +72,6 @@ void main() {
           expect(pack0.dependents, isEmpty);
           expect(pack0.dependencies.keys, {'pack01', 'pack02', 'pack03'});
 
-          // ......
           // pack01
           final pack01 = pack0.dependencies['pack01']!;
           expect(pack01.name, 'pack01');
@@ -95,7 +93,6 @@ void main() {
           expect(pack03.dependents.keys, {'pack0'});
           expect(pack03.dependencies.keys, {'pack031'});
 
-          // .......
           // pack011
           final pack011 = pack01.dependencies['pack011']!;
           expect(pack011.name, 'pack011');
@@ -141,7 +138,6 @@ void main() {
           expect(pack0.dependents, isEmpty);
           expect(pack0.dependencies.keys, {'pack01', 'pack02', 'pack03'});
 
-          // ......
           // pack01
           final pack01 = pack0.dependencies['pack01']!;
           expect(pack01.name, 'pack01');
@@ -163,7 +159,6 @@ void main() {
           expect(pack03.dependents.keys, {'pack0'});
           expect(pack03.dependencies.keys, {'pack031'});
 
-          // .......
           // pack011
           final pack011 = pack01.dependencies['pack011']!;
           expect(pack011.name, 'pack011');
@@ -195,6 +190,16 @@ void main() {
           expect(messages[4], '  pack02');
           expect(messages[5], '  pack03');
           expect(messages[6], '    pack031');
+        });
+
+        test('uses command logger when ggLog parameter is omitted', () async {
+          final localMessages = <String>[];
+          final localGraph = Graph(ggLog: localMessages.add);
+
+          final result = await localGraph.get(directory: dPlain);
+
+          expect(result.keys.toList()..sort(), ['pack0', 'pack1', 'pack2']);
+          expect(localMessages, isEmpty);
         });
       });
 
@@ -274,32 +279,50 @@ void main() {
 
       group('should throw', () {
         test('when multiple packages have the same name', () async {
-          late Exception exception;
-          try {
-            await graph.get(directory: dDuplicate, ggLog: ggLog);
-          } catch (e) {
-            exception = e as Exception;
-          }
+          final result = await graph.get(directory: dDuplicate, ggLog: ggLog);
 
-          expect(exception, isA<Exception>());
+          expect(result.keys, {'pack0'});
           expect(
-            exception.toString(),
-            'Exception: Duplicate package name: pack0',
+            messages,
+            contains(
+              yellow('Found duplicate package name: pack0 in ') +
+                  blue(join(dDuplicate.path, 'pack0b')),
+            ),
+          );
+          expect(
+            messages,
+            contains(yellow("Project won't be added to dependency graph.")),
+          );
+          expect(
+            messages,
+            contains(
+              yellow('Found duplicate package name: pack0 in ') +
+                  blue(join(dDuplicate.path, 'pack0c')),
+            ),
           );
         });
 
         test('when multiple TypeScript packages have the same name', () async {
-          late Exception exception;
-          try {
-            await graph.get(directory: dDuplicateTs, ggLog: ggLog);
-          } catch (e) {
-            exception = e as Exception;
-          }
+          final result = await graph.get(directory: dDuplicateTs, ggLog: ggLog);
 
-          expect(exception, isA<Exception>());
+          expect(result.keys, {'pack0'});
           expect(
-            exception.toString(),
-            'Exception: Duplicate package name: pack0',
+            messages,
+            contains(
+              yellow('Found duplicate package name: pack0 in ') +
+                  blue(join(dDuplicateTs.path, 'pack0b')),
+            ),
+          );
+          expect(
+            messages,
+            contains(yellow("Project won't be added to dependency graph.")),
+          );
+          expect(
+            messages,
+            contains(
+              yellow('Found duplicate package name: pack0 in ') +
+                  blue(join(dDuplicateTs.path, 'pack0c')),
+            ),
           );
         });
 
@@ -343,7 +366,6 @@ void main() {
     });
   });
 
-  // ###########################################################################
   group('getNodesBetween', () {
     late Graph localGraph;
 

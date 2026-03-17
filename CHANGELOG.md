@@ -12,6 +12,7 @@
 
 - Add test for getNodesBetween
 - Add typescript support
+- Add test for default logger behavior in Graph constructor
 
 ### Changed
 

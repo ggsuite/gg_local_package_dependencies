@@ -6,7 +6,7 @@
 
 - Add sorted processing list
 
-## [Unreleased]
+## [1.2.0] - 2026-03-17
 
 ### Added
 
@@ -75,7 +75,7 @@
 
 - initial
 
-[Unreleased]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.2...HEAD
+[1.2.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.2...1.2.0
 [1.1.2]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.0.4...1.1.0

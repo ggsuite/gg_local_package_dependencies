@@ -239,6 +239,45 @@ dev_dependencies:
       );
 
       test(
+        'strips @scope/ prefix from package name and dependency keys',
+        () async {
+          final tempDir = await Directory.systemTemp.createTemp(
+            'ts_pkg_language_test_',
+          );
+          try {
+            final pkgDir = Directory(p.join(tempDir.path, 'pkg'));
+            await pkgDir.create(recursive: true);
+
+            final packageJsonFile = File(p.join(pkgDir.path, 'package.json'));
+            await packageJsonFile.writeAsString('''
+{
+  "name": "@rljson/hash",
+  "version": "1.0.0",
+  "dependencies": {
+    "@rljson/json": "^1.0.0",
+    "lodash": "^4.0.0"
+  },
+  "devDependencies": {
+    "@rljson/test-utils": "^1.0.0"
+  }
+}
+''');
+
+            final language = TypeScriptPackageLanguage();
+            final manifest =
+                await language.loadManifest(pkgDir)
+                    as TypeScriptPackageManifest;
+
+            expect(manifest.name, 'hash');
+            expect(manifest.dependencies, containsAll(['json', 'lodash']));
+            expect(manifest.devDependencies, contains('test-utils'));
+          } finally {
+            await tempDir.delete(recursive: true);
+          }
+        },
+      );
+
+      test(
         'loadManifest throws when name field is missing or invalid',
         () async {
           final tempDir = await Directory.systemTemp.createTemp(

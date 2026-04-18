@@ -106,6 +106,20 @@ class TypeScriptPackageManifest implements PackageManifest {
   final Map<String, dynamic> rawJson;
 }
 
+/// Strips a leading npm scope such as `@rljson/` from [name], returning the
+/// bare package name (e.g. `@rljson/hash` -> `hash`). Names without a scope
+/// are returned unchanged.
+String stripNpmScope(String name) {
+  if (!name.startsWith('@')) {
+    return name;
+  }
+  final slash = name.indexOf('/');
+  if (slash <= 0 || slash == name.length - 1) {
+    return name;
+  }
+  return name.substring(slash + 1);
+}
+
 /// Package language implementation for TypeScript / JavaScript.
 class TypeScriptPackageLanguage implements PackageLanguage {
   @override
@@ -143,7 +157,7 @@ class TypeScriptPackageLanguage implements PackageLanguage {
       Iterable<String> extractDependencies(String key) {
         final dynamic section = map[key];
         if (section is Map<String, dynamic>) {
-          return section.keys;
+          return section.keys.map(stripNpmScope);
         }
         return const <String>[];
       }
@@ -152,7 +166,7 @@ class TypeScriptPackageLanguage implements PackageLanguage {
       final devDependencies = extractDependencies('devDependencies');
 
       return TypeScriptPackageManifest(
-        name: nameValue,
+        name: stripNpmScope(nameValue),
         dependencies: dependencies,
         devDependencies: devDependencies,
         rawJson: map,

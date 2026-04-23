@@ -6,6 +6,14 @@
 
 - Add sorted processing list
 
+## [1.3.0] - 2026-04-23
+
+### Changed
+
+- kidney: changed references to path
+- kidney: changed references to git
+- kidney: changed references to local
+
 ## [1.2.1] - 2026-04-18
 
 ### Changed
@@ -81,6 +89,7 @@
 
 - initial
 
+[1.3.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.2...1.2.0
 [1.1.2]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.1...1.1.2

@@ -1,0 +1,7 @@
+{
+  "name": "@scope/ts_app",
+  "version": "1.0.0",
+  "dependencies": {
+    "@scope/bridge": "^1.0.0"
+  }
+}

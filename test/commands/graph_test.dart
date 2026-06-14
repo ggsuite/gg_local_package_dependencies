@@ -602,4 +602,72 @@ void main() {
       expect(between, isEmpty);
     });
   });
+
+  group('cross language', () {
+    // A trio mirroring a Dart <-> TypeScript bridge: a pure Dart leaf, a
+    // bridge repo carrying both a pubspec.yaml and a package.json, and a pure
+    // TypeScript app that depends on the bridge by its npm name.
+    final dCross = Directory(join('test', 'sample_folder_cross'));
+
+    late Graph localGraph;
+
+    setUp(() async {
+      expect(await dCross.exists(), isTrue);
+      localGraph = Graph(ggLog: (_) {});
+    });
+
+    // Helper to collect all nodes reachable via dependencies from roots.
+    Map<String, Node> collectAllNodes(Map<String, Node> roots) {
+      final map = <String, Node>{};
+      void dfs(Node n) {
+        if (map.containsKey(n.name)) {
+          return;
+        }
+        map[n.name] = n;
+        for (final dep in n.dependencies.values) {
+          dfs(dep);
+        }
+      }
+
+      for (final r in roots.values) {
+        dfs(r);
+      }
+
+      return map;
+    }
+
+    test('links the Dart and TypeScript sides through the bridge', () async {
+      final roots = await localGraph.get(directory: dCross, ggLog: (_) {});
+
+      // The only root is the TypeScript app; nothing depends on it.
+      expect(roots.keys, {'ts_app'});
+
+      final all = collectAllNodes(roots);
+      expect(all.keys, {'ts_app', 'bridge_dart', 'dart_leaf'});
+
+      // The bridge carries both manifests and is reachable under its Dart
+      // name, its npm name and its directory name.
+      final bridge = all['bridge_dart']!;
+      expect(bridge.manifests, hasLength(2));
+      expect(bridge.aliases, containsAll(<String>['bridge_dart', 'bridge']));
+      expect(basename(bridge.directory.path), 'bridge');
+
+      // ts_app depends on the bridge via its npm name; bridge on the Dart leaf.
+      final tsApp = all['ts_app']!;
+      expect(tsApp.dependencies.keys, {'bridge_dart'});
+      expect(bridge.dependencies.keys, {'dart_leaf'});
+    });
+
+    test('getNodesBetween finds the bridge between both leaves', () async {
+      final roots = await localGraph.get(directory: dCross, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+
+      final dartLeaf = all['dart_leaf']!;
+      final tsApp = all['ts_app']!;
+
+      final between = localGraph.getNodesBetween(all, [dartLeaf, tsApp]);
+      expect(between.map((e) => e.name), ['bridge_dart']);
+      expect(between.map((e) => basename(e.directory.path)), ['bridge']);
+    });
+  });
 }

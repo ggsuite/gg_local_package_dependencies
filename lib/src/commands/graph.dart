@@ -11,6 +11,7 @@ import 'package:gg_console_colors/gg_console_colors.dart';
 import 'package:gg_local_package_dependencies/gg_local_package_dependencies.dart';
 import 'package:gg_log/gg_log.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart' as p;
 
 /// Returns dependency graph of packages in a local folder.
 class Graph extends DirCommand<void> {
@@ -57,55 +58,86 @@ class Graph extends DirCommand<void> {
     // Create a dictionary of name to node.
     final nodes = <String, Node>{};
 
+    // Index every alias (manifest names + directory name) to its node, so
+    // dependency edges can be resolved across language boundaries (a Dart
+    // package name vs. the npm package name of the very same repo).
+    final nodesByAlias = <String, Node>{};
+
     for (final dir in allDirs) {
+      // Collect a manifest for every language that recognizes this directory.
+      // A cross-language repo (e.g. a Dart + TypeScript bridge) yields more
+      // than one; single-language repos yield exactly one.
+      final manifests = <PackageManifest>[];
       for (final language in languages) {
-        if (!language.isPackageDirectory(dir)) {
-          continue;
+        if (language.isPackageDirectory(dir)) {
+          manifests.add(await language.loadManifest(dir));
         }
+      }
 
-        final manifest = await language.loadManifest(dir);
-        final node = Node(
-          name: manifest.name,
-          directory: dir,
-          manifest: manifest,
+      if (manifests.isEmpty) {
+        continue;
+      }
+
+      // The first matching language stays primary. This preserves the
+      // Dart-first priority and the historical node name for the common
+      // single-language case.
+      final primary = manifests.first;
+      final aliases = <String>{
+        for (final manifest in manifests) manifest.name,
+        p.basename(dir.path),
+      };
+
+      final node = Node(
+        name: primary.name,
+        directory: dir,
+        manifest: primary,
+        manifests: manifests,
+        aliases: aliases,
+      );
+
+      // Skip the node if any of its aliases is already claimed by another
+      // node (duplicate package or directory name).
+      final clash = aliases.firstWhere(
+        nodesByAlias.containsKey,
+        orElse: () => '',
+      );
+      if (clash.isNotEmpty) {
+        _logDuplicatePackage(
+          ggLog: log,
+          packageName: node.name,
+          packagePath: dir.path,
         );
+        continue;
+      }
 
-        if (nodes.containsKey(node.name)) {
-          _logDuplicatePackage(
-            ggLog: log,
-            packageName: node.name,
-            packagePath: dir.path,
-          );
-          break;
-        }
-
-        nodes[node.name] = node;
-
-        // A directory should be handled by at most one language, so stop
-        // iterating languages once a match is found.
-        break;
+      nodes[node.name] = node;
+      for (final alias in aliases) {
+        nodesByAlias[alias] = node;
       }
     }
 
     // Estimate dependencies of all nodes.
     for (final node in nodes.values) {
-      final dependencyNames = <String>[
-        ...node.manifest.dependencies,
-        ...node.manifest.devDependencies,
-      ];
+      // Union of the dependencies declared by every manifest of the node, so
+      // both the Dart and the TypeScript side of a cross-language repo
+      // contribute edges.
+      final dependencyNames = <String>{
+        for (final manifest in node.manifests) ...manifest.dependencies,
+        for (final manifest in node.manifests) ...manifest.devDependencies,
+      };
 
       for (final dependency in dependencyNames) {
-        // Is the dependency locally found?
-        final isFound = nodes.containsKey(dependency);
-        if (!isFound) {
+        // Resolve the dependency against any known alias. This is what lets a
+        // TypeScript package depending on the npm name of a bridge reach the
+        // node that is primarily known under its Dart name.
+        final dependentNode = nodesByAlias[dependency];
+        if (dependentNode == null || identical(dependentNode, node)) {
           continue;
         }
 
-        // Get the dependent node.
-        final dependentNode = nodes[dependency]!;
-
-        // Add the dependency to the dependencies list.
-        node.dependencies[dependency] = dependentNode;
+        // Add the dependency to the dependencies list (keyed by the resolved
+        // primary name so aliases collapse to a single edge).
+        node.dependencies[dependentNode.name] = dependentNode;
 
         // Add this node to the dependents list of the dependent node.
         dependentNode.dependents[node.name] = node;

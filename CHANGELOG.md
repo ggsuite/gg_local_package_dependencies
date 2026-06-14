@@ -6,6 +6,12 @@
 
 - Add sorted processing list
 
+## [Unreleased]
+
+### Changed
+
+- Build dependency graph across Dart and TypeScript bridge repos
+
 ## [1.3.0] - 2026-04-23
 
 ### Changed
@@ -89,6 +95,7 @@
 
 - initial
 
+[Unreleased]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.3.0...HEAD
 [1.3.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.2...1.2.0

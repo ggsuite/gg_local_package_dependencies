@@ -12,6 +12,10 @@
 
 - Build dependency graph across Dart and TypeScript bridge repos
 
+### Fixed
+
+- Fix non-destructive sorted processing order (no longer mutates live Node.dependencies); make do/publish dependency refresh treat bridges as TypeScript via checkProjectType, symmetric with do/review and do/cancel\_review
+
 ## [1.3.0] - 2026-04-23
 
 ### Changed

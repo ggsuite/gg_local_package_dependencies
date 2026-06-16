@@ -63,13 +63,22 @@ class SortedProcessingList extends DirCommand<void> {
     final remaining = allNodesSet.toList()
       ..sort((a, b) => a.name.compareTo(b.name));
 
+    // Track each node's still-unprocessed dependencies in a LOCAL map so the
+    // live Node.dependencies graph is never mutated (callers may reuse it).
+    final pendingDeps = <Node, Set<Node>>{
+      for (final node in remaining) node: node.dependencies.values.toSet(),
+    };
+
     // Apply the algorithm
     final sortedNodes = <Node>[];
     while (remaining.isNotEmpty) {
       for (final item in [...remaining]) {
-        if (item.dependencies.isEmpty) {
+        if (pendingDeps[item]!.isEmpty) {
           sortedNodes.add(item);
-          removeNodeFromList(remaining, item);
+          remaining.remove(item);
+          for (final other in remaining) {
+            pendingDeps[other]!.remove(item);
+          }
           break;
         }
       }
@@ -82,14 +91,7 @@ class SortedProcessingList extends DirCommand<void> {
   // Private
   // ######################
 
-  /// Removes a node from the list and all its dependencies
-  void removeNodeFromList(List<Node> list, Node node) {
-    list.remove(node);
-    for (final item in list) {
-      item.dependencies.removeWhere((key, value) => value == node);
-    }
-  }
-
+  // ...........................................................................
   final Graph _graph;
 }
 

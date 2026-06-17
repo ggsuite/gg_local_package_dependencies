@@ -639,21 +639,26 @@ void main() {
     test('links the Dart and TypeScript sides through the bridge', () async {
       final roots = await localGraph.get(directory: dCross, ggLog: (_) {});
 
-      // The only root is the TypeScript app; nothing depends on it.
-      expect(roots.keys, {'ts_app'});
+      // The only root is the TypeScript app; nothing depends on it. Its npm
+      // scope is preserved in the node name.
+      expect(roots.keys, {'@scope/ts_app'});
 
       final all = collectAllNodes(roots);
-      expect(all.keys, {'ts_app', 'bridge_dart', 'dart_leaf'});
+      expect(all.keys, {'@scope/ts_app', 'bridge_dart', 'dart_leaf'});
 
       // The bridge carries both manifests and is reachable under its Dart
-      // name, its npm name and its directory name.
+      // name, its full npm name and its directory name.
       final bridge = all['bridge_dart']!;
       expect(bridge.manifests, hasLength(2));
-      expect(bridge.aliases, containsAll(<String>['bridge_dart', 'bridge']));
+      expect(
+        bridge.aliases,
+        containsAll(<String>['bridge_dart', '@scope/bridge', 'bridge']),
+      );
       expect(basename(bridge.directory.path), 'bridge');
 
-      // ts_app depends on the bridge via its npm name; bridge on the Dart leaf.
-      final tsApp = all['ts_app']!;
+      // ts_app depends on the bridge via its full npm name; the edge resolves
+      // to the bridge node keyed by its primary (Dart) name.
+      final tsApp = all['@scope/ts_app']!;
       expect(tsApp.dependencies.keys, {'bridge_dart'});
       expect(bridge.dependencies.keys, {'dart_leaf'});
     });
@@ -663,11 +668,48 @@ void main() {
       final all = collectAllNodes(roots);
 
       final dartLeaf = all['dart_leaf']!;
-      final tsApp = all['ts_app']!;
+      final tsApp = all['@scope/ts_app']!;
 
       final between = localGraph.getNodesBetween(all, [dartLeaf, tsApp]);
       expect(between.map((e) => e.name), ['bridge_dart']);
       expect(between.map((e) => basename(e.directory.path)), ['bridge']);
+    });
+
+    test('keeps npm packages with the same bare name but different scopes '
+        'distinct', () async {
+      final ws = Directory.systemTemp.createTempSync('lpd_scope_collision_');
+      try {
+        // `@scope/api` and `@other/api` collapse to the same bare name only
+        // if the scope is stripped. They must stay distinct nodes.
+        Directory(join(ws.path, 'scope_api')).createSync();
+        File(
+          join(ws.path, 'scope_api', 'package.json'),
+        ).writeAsStringSync('{"name":"@scope/api","version":"1.0.0"}');
+        Directory(join(ws.path, 'other_api')).createSync();
+        File(
+          join(ws.path, 'other_api', 'package.json'),
+        ).writeAsStringSync('{"name":"@other/api","version":"1.0.0"}');
+        // An app that depends specifically on @scope/api.
+        Directory(join(ws.path, 'app')).createSync();
+        File(join(ws.path, 'app', 'package.json')).writeAsStringSync(
+          '{"name":"@scope/app","version":"1.0.0",'
+          '"dependencies":{"@scope/api":"^1.0.0"}}',
+        );
+
+        final roots = await Graph(
+          ggLog: (_) {},
+        ).get(directory: ws, ggLog: (_) {});
+        final all = collectAllNodes(roots);
+
+        // Both scoped packages survive (no false duplicate-drop).
+        expect(all.keys, containsAll(<String>['@scope/api', '@other/api']));
+
+        // The app's dependency resolves to @scope/api, not @other/api.
+        final app = all['@scope/app']!;
+        expect(app.dependencies.keys, {'@scope/api'});
+      } finally {
+        ws.deleteSync(recursive: true);
+      }
     });
   });
 }

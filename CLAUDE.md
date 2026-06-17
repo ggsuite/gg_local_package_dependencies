@@ -29,8 +29,8 @@ Entry point `bin/gg_local_package_dependencies.dart` wires `GgCommandRunner` (fr
 Graph construction (`lib/src/commands/graph.dart`) is the core:
 
 1. Enumerate immediate subdirectories of the input folder.
-2. For each dir, ask every registered `PackageLanguage` whether it owns the dir (`isPackageDirectory`); first match wins. This is the extension point for new languages.
-3. Load a `PackageManifest` (name + local deps + dev deps). Duplicate package names are reported and skipped.
+2. For each dir, ask every registered `PackageLanguage` whether it owns the dir (`isPackageDirectory`); **all** matching languages contribute a manifest, so a cross-language repo (e.g. a Dart + TypeScript bridge with both `pubspec.yaml` and `package.json`) yields one node carrying multiple manifests. This is the extension point for new languages.
+3. Load a `PackageManifest` per matching language (name + local deps + dev deps); the first language stays primary. npm-scoped names are kept in full (`@scope/pkg`), so different scopes are distinct. Duplicate names/aliases are reported and skipped.
 4. Cross-link nodes: for each declared dep/dev-dep, if the name matches another discovered node, wire it into both `Node.dependencies` and the counterpart's `Node.dependents`.
 5. Return the map of **root** nodes (nodes with no dependents). `_printNode` recursively prints the tree; circular dependencies are detected and raised as errors.
 

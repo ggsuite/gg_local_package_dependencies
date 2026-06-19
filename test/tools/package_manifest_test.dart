@@ -238,18 +238,16 @@ dev_dependencies:
         },
       );
 
-      test(
-        'strips @scope/ prefix from package name and dependency keys',
-        () async {
-          final tempDir = await Directory.systemTemp.createTemp(
-            'ts_pkg_language_test_',
-          );
-          try {
-            final pkgDir = Directory(p.join(tempDir.path, 'pkg'));
-            await pkgDir.create(recursive: true);
+      test('preserves npm-scoped package name and dependency keys', () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'ts_pkg_language_test_',
+        );
+        try {
+          final pkgDir = Directory(p.join(tempDir.path, 'pkg'));
+          await pkgDir.create(recursive: true);
 
-            final packageJsonFile = File(p.join(pkgDir.path, 'package.json'));
-            await packageJsonFile.writeAsString('''
+          final packageJsonFile = File(p.join(pkgDir.path, 'package.json'));
+          await packageJsonFile.writeAsString('''
 {
   "name": "@rljson/hash",
   "version": "1.0.0",
@@ -263,19 +261,20 @@ dev_dependencies:
 }
 ''');
 
-            final language = TypeScriptPackageLanguage();
-            final manifest =
-                await language.loadManifest(pkgDir)
-                    as TypeScriptPackageManifest;
+          final language = TypeScriptPackageLanguage();
+          final manifest =
+              await language.loadManifest(pkgDir) as TypeScriptPackageManifest;
 
-            expect(manifest.name, 'hash');
-            expect(manifest.dependencies, containsAll(['json', 'lodash']));
-            expect(manifest.devDependencies, contains('test-utils'));
-          } finally {
-            await tempDir.delete(recursive: true);
-          }
-        },
-      );
+          expect(manifest.name, '@rljson/hash');
+          expect(
+            manifest.dependencies,
+            containsAll(['@rljson/json', 'lodash']),
+          );
+          expect(manifest.devDependencies, contains('@rljson/test-utils'));
+        } finally {
+          await tempDir.delete(recursive: true);
+        }
+      });
 
       test(
         'loadManifest throws when name field is missing or invalid',

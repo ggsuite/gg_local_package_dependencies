@@ -6,6 +6,17 @@
 
 - Add sorted processing list
 
+## [1.4.0] - 2026-06-19
+
+### Changed
+
+- Build dependency graph across Dart and TypeScript bridge repos
+
+### Fixed
+
+- Fix non-destructive sorted processing order (no longer mutates live Node.dependencies); make do/publish dependency refresh treat bridges as TypeScript via checkProjectType, symmetric with do/review and do/cancel\_review
+- Review fixes: keep full npm-scoped names in the dependency graph so different scopes stay distinct (no false duplicate-drop / misrouted edges); surface bridges in gg ls (dart+nodejs label, list package.json deps as typescript)
+
 ## [1.3.0] - 2026-04-23
 
 ### Changed
@@ -89,6 +100,7 @@
 
 - initial
 
+[1.4.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/inlavigo/gg_local_package_dependencies/compare/1.1.2...1.2.0

@@ -1,0 +1,5 @@
+name: flat_pack
+version: 1.0.0
+
+dependencies:
+  pack0: ^1.0.0

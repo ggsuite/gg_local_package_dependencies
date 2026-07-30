@@ -712,4 +712,109 @@ void main() {
       }
     });
   });
+
+  group('organization folders', () {
+    // A workspace that groups its repositories in folders named after the
+    // organization they belong to, next to a repository that still sits
+    // directly in the workspace.
+    final dOrgs = Directory(join('test', 'sample_folder_orgs'));
+
+    late Graph localGraph;
+
+    setUp(() async {
+      expect(await dOrgs.exists(), isTrue);
+      localGraph = Graph(ggLog: (_) {});
+    });
+
+    Map<String, Node> collectAllNodes(Map<String, Node> roots) {
+      final map = <String, Node>{};
+      void dfs(Node n) {
+        if (map.containsKey(n.name)) {
+          return;
+        }
+        map[n.name] = n;
+        for (final dep in n.dependencies.values) {
+          dfs(dep);
+        }
+      }
+
+      for (final r in roots.values) {
+        dfs(r);
+      }
+
+      return map;
+    }
+
+    test('finds the repositories inside the organization folders', () async {
+      final roots = await localGraph.get(directory: dOrgs, ggLog: (_) {});
+      expect(roots.keys, {'flat_pack'});
+
+      final all = collectAllNodes(roots);
+      expect(all.keys, {'flat_pack', 'pack0', 'pack1', 'pack2'});
+
+      // The nodes keep the folder they were found in.
+      expect(all['pack0']!.directory.path, join(dOrgs.path, 'org_a', 'pack0'));
+      expect(all['pack2']!.directory.path, join(dOrgs.path, 'org_b', 'pack2'));
+    });
+
+    test('links dependencies across organization folders', () async {
+      final roots = await localGraph.get(directory: dOrgs, ggLog: (_) {});
+      final all = collectAllNodes(roots);
+
+      // pack0 lives in org_a and depends on pack2 in org_b.
+      expect(all['pack0']!.dependencies.keys, {'pack1', 'pack2'});
+      expect(all['pack2']!.dependents.keys, {'pack0'});
+
+      // A repository that still sits directly in the workspace is linked to
+      // the ones inside the organization folders.
+      expect(all['flat_pack']!.dependencies.keys, {'pack0'});
+    });
+
+    test('does not descend into a repository', () async {
+      // `org_a/pack0/example` is a package too, but it belongs to pack0 and
+      // must not become a node of the workspace.
+      final roots = await localGraph.get(directory: dOrgs, ggLog: (_) {});
+      expect(collectAllNodes(roots).keys, isNot(contains('pack0_example')));
+    });
+
+    test('does not descend into a git repository without a manifest', () async {
+      final ws = Directory.systemTemp.createTempSync('lpd_orgs_git_');
+      try {
+        // A repository in a language gg does not know: no manifest, but a
+        // `.git` folder. Its inner packages stay invisible.
+        final repo = Directory(join(ws.path, 'other_lang_repo'))
+          ..createSync(recursive: true);
+        Directory(join(repo.path, '.git')).createSync();
+        Directory(join(repo.path, 'sub')).createSync();
+        File(
+          join(repo.path, 'sub', 'pubspec.yaml'),
+        ).writeAsStringSync('name: hidden_pack\nversion: 1.0.0\n');
+
+        final roots = await Graph(
+          ggLog: (_) {},
+        ).get(directory: ws, ggLog: (_) {});
+        expect(roots, isEmpty);
+      } finally {
+        ws.deleteSync(recursive: true);
+      }
+    });
+
+    test('does not descend into hidden folders', () async {
+      final ws = Directory.systemTemp.createTempSync('lpd_orgs_hidden_');
+      try {
+        final hidden = Directory(join(ws.path, '.cache', 'pack'))
+          ..createSync(recursive: true);
+        File(
+          join(hidden.path, 'pubspec.yaml'),
+        ).writeAsStringSync('name: cached_pack\nversion: 1.0.0\n');
+
+        final roots = await Graph(
+          ggLog: (_) {},
+        ).get(directory: ws, ggLog: (_) {});
+        expect(roots, isEmpty);
+      } finally {
+        ws.deleteSync(recursive: true);
+      }
+    });
+  });
 }

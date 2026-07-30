@@ -51,9 +51,8 @@ class Graph extends DirCommand<void> {
   }) async {
     final log = ggLog ?? this.ggLog;
 
-    // Get a list of all direct sub directories.
-    final allDirs = directory.listSync().whereType<Directory>().toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
+    // Get a list of all directories that may hold a package.
+    final allDirs = packageCandidateDirs(directory);
 
     // Create a dictionary of name to node.
     final nodes = <String, Node>{};
@@ -265,6 +264,43 @@ class Graph extends DirCommand<void> {
 
     final result = resultSet.toList()..sort((l, r) => l.name.compareTo(r.name));
     return result;
+  }
+
+  /// Returns every directory below [directory] that may hold a package: its
+  /// direct sub directories plus the sub directories of each of them that is a
+  /// grouping folder. The result is sorted by path.
+  ///
+  /// Workspaces group their repositories in folders named after the
+  /// organization a repository belongs to (`<workspace>/<org>/<repo>`). Such a
+  /// grouping folder carries no manifest and no `.git`, so descending into it
+  /// reaches the repositories, while a repository itself is never descended
+  /// into. Packages nested inside a repository (`example/`, test fixtures, …)
+  /// therefore stay invisible, exactly as in a flat workspace.
+  List<Directory> packageCandidateDirs(Directory directory) {
+    final result = <Directory>[];
+    for (final dir in _subDirs(directory)) {
+      result.add(dir);
+      if (_isGroupingDir(dir)) {
+        result.addAll(_subDirs(dir));
+      }
+    }
+    return result..sort((a, b) => a.path.compareTo(b.path));
+  }
+
+  /// Returns the direct sub directories of [directory].
+  List<Directory> _subDirs(Directory directory) =>
+      directory.listSync().whereType<Directory>().toList();
+
+  /// Returns true when [dir] groups repositories instead of being one: a
+  /// visible folder that is neither a package nor a git repository.
+  bool _isGroupingDir(Directory dir) {
+    if (p.basename(dir.path).startsWith('.')) {
+      return false;
+    }
+    if (languages.any((language) => language.isPackageDirectory(dir))) {
+      return false;
+    }
+    return !Directory(p.join(dir.path, '.git')).existsSync();
   }
 
   /// Logs that a duplicate package was found and ignored.

@@ -13,5 +13,5 @@ build
 .DS_Store
 
 .aicode
-.gg
+.gg/*
 !.gg/.gg.json

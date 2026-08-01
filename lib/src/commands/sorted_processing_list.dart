@@ -40,10 +40,20 @@ class SortedProcessingList extends DirCommand<void> {
 
   // ...........................................................................
   /// Returns a list of all nodes in processing order
+  ///
+  /// See [Graph.get] for the meaning of [packageDirs].
   @override
-  Future<List<Node>> get({required Directory directory, GgLog? ggLog}) async {
+  Future<List<Node>> get({
+    required Directory directory,
+    GgLog? ggLog,
+    List<Directory>? packageDirs,
+  }) async {
     // Get the graph
-    final graph = await _graph.get(directory: directory, ggLog: ggLog);
+    final graph = await _graph.get(
+      directory: directory,
+      ggLog: ggLog,
+      packageDirs: packageDirs,
+    );
 
     // Collect all unique nodes
     final allNodesSet = <Node>{};

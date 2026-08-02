@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- \#gg: changed references to pub.dev
+
+## 2.1.0 - 2026-08-01
+
+### Added
+
+- `Graph.get`, `ProcessingList.get` and `SortedProcessingList.get` accept an
+optional `packageDirs` list to graph an explicit set of package folders
+instead of the ones discovered below the input directory. This makes it
+possible to build one graph across several roots.
+
 ## 2.0.0 - 2026-07-31
 
 ### Changed

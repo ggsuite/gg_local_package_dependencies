@@ -816,5 +816,70 @@ void main() {
         ws.deleteSync(recursive: true);
       }
     });
+
+    group('with explicit packageDirs', () {
+      test('graphs exactly the given folders', () async {
+        final roots = await localGraph.get(
+          directory: dOrgs,
+          ggLog: (_) {},
+          packageDirs: <Directory>[
+            Directory(join(dOrgs.path, 'org_a', 'pack0')),
+            Directory(join(dOrgs.path, 'org_b', 'pack2')),
+          ],
+        );
+
+        // pack1 was not offered, so pack0 keeps only its edge to pack2.
+        final all = collectAllNodes(roots);
+        expect(all.keys, {'pack0', 'pack2'});
+        expect(all['pack0']!.dependencies.keys, {'pack2'});
+      });
+
+      test('links packages taken from several roots', () async {
+        // The layout a ticket produces: some repos are checked out into the
+        // ticket, the rest is only available in the master workspace.
+        final ws = Directory.systemTemp.createTempSync('lpd_multi_root_');
+        try {
+          Directory pack(String root, String name) {
+            final dir = Directory(join(ws.path, root, name))
+              ..createSync(recursive: true);
+            return dir;
+          }
+
+          final ticketPack = pack('ticket', 'pack_a');
+          File(join(ticketPack.path, 'pubspec.yaml')).writeAsStringSync(
+            'name: pack_a\nversion: 1.0.0\ndependencies:\n  pack_b: ^1.0.0\n',
+          );
+
+          final masterPack = pack('master', 'pack_b');
+          File(
+            join(masterPack.path, 'pubspec.yaml'),
+          ).writeAsStringSync('name: pack_b\nversion: 1.0.0\n');
+
+          final roots = await Graph(ggLog: (_) {}).get(
+            directory: ws,
+            ggLog: (_) {},
+            packageDirs: <Directory>[ticketPack, masterPack],
+          );
+
+          expect(roots.keys, {'pack_a'});
+          expect(roots['pack_a']!.dependencies.keys, {'pack_b'});
+        } finally {
+          ws.deleteSync(recursive: true);
+        }
+      });
+
+      test('ignores folders without a manifest', () async {
+        final roots = await localGraph.get(
+          directory: dOrgs,
+          ggLog: (_) {},
+          packageDirs: <Directory>[
+            Directory(join(dOrgs.path, 'org_a')),
+            Directory(join(dOrgs.path, 'org_a', 'pack1')),
+          ],
+        );
+
+        expect(collectAllNodes(roots).keys, {'pack1'});
+      });
+    });
   });
 }

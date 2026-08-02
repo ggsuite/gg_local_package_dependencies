@@ -44,15 +44,24 @@ class Graph extends DirCommand<void> {
   }
 
   /// Returns a map of all root nodes in the dependency graph.
+  ///
+  /// Pass [packageDirs] to graph an explicit set of package folders instead of
+  /// the ones discovered below [directory]. This lets a caller build one graph
+  /// across several roots — e.g. the repositories checked out into a ticket
+  /// plus the ones that only exist in the master workspace.
   @override
   Future<Map<String, Node>> get({
     required Directory directory,
     GgLog? ggLog,
+    List<Directory>? packageDirs,
   }) async {
     final log = ggLog ?? this.ggLog;
 
     // Get a list of all directories that may hold a package.
-    final allDirs = packageCandidateDirs(directory);
+    final allDirs = packageDirs == null
+        ? packageCandidateDirs(directory)
+        : (List<Directory>.from(packageDirs)
+            ..sort((a, b) => a.path.compareTo(b.path)));
 
     // Create a dictionary of name to node.
     final nodes = <String, Node>{};

@@ -40,12 +40,22 @@ class ProcessingList extends DirCommand<void> {
 
   // ...........................................................................
   /// Returns a map of all root nodes in the dependency graph
+  ///
+  /// See [Graph.get] for the meaning of [packageDirs].
   @override
-  Future<List<Node>> get({required Directory directory, GgLog? ggLog}) async {
+  Future<List<Node>> get({
+    required Directory directory,
+    GgLog? ggLog,
+    List<Directory>? packageDirs,
+  }) async {
     final result = <Node>[];
 
     // Calculate a graph
-    final graph = await _graph.get(directory: directory, ggLog: ggLog);
+    final graph = await _graph.get(
+      directory: directory,
+      ggLog: ggLog,
+      packageDirs: packageDirs,
+    );
 
     for (final node in graph.values) {
       _processNode(node, result);

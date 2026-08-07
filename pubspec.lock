@@ -123,18 +123,16 @@ packages:
   gg_capture_print:
     dependency: "direct dev"
     description:
-      name: gg_capture_print
-      sha256: a1a4856a7ea2b11482ad5233febab72e541b4545af2c1229a425605b8036983c
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.9"
+      path: "../gg_capture_print"
+      relative: true
+    source: path
+    version: "1.0.10"
   gg_console_colors:
     dependency: "direct main"
     description:
-      name: gg_console_colors
-      sha256: "937a99228fb60796f53b24dcbe580cbc17ef0c1ceed6877df58a881d3d8d930b"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_console_colors"
+      relative: true
+    source: path
     version: "2.3.0"
   gg_log:
     dependency: "direct main"
@@ -146,11 +144,10 @@ packages:
   gg_process:
     dependency: "direct main"
     description:
-      name: gg_process
-      sha256: a81c1a0b8905eacb80c78e5cf6a096327220823ab5a61fdd2ebdcb5ad5ad157c
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.6"
+      path: "../gg_process"
+      relative: true
+    source: path
+    version: "1.1.7"
   glob:
     dependency: transitive
     description:

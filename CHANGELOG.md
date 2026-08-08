@@ -5,6 +5,7 @@
 ### Changed
 
 - \#gg: changed references to pub.dev
+- Allow to pass custom options to exec of dir commands.
 
 ## 2.1.0 - 2026-08-01
 

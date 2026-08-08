@@ -7,20 +7,20 @@ environment:
   sdk: ">=3.8.1<4.0.0"
 
 dependencies:
-  args: ^2.4.2
-  gg_args: ^2.0.2
-  gg_console_colors: ^2.1.2
-  gg_log: ^1.0.3
-  gg_process: ^1.1.4
-  mocktail: ^1.0.3
-  path: ^1.8.0
-  pub_semver: ^2.1.4
-  pubspec_parse: ^1.2.3
+  args: ^2.7.0
+  gg_args: ^2.2.0
+  gg_console_colors: ^2.3.0
+  gg_log: ^1.0.6
+  gg_process: ^1.1.6
+  mocktail: ^1.0.5
+  path: ^1.9.1
+  pub_semver: ^2.2.0
+  pubspec_parse: ^1.5.0
 
 dev_dependencies:
-  gg_capture_print: ^1.0.6
-  lints: ^6.0.0
-  test: ^1.24.0
+  gg_capture_print: ^1.0.9
+  lints: ^6.1.0
+  test: ^1.31.2
 
 executables:
   gg_local_package_dependencies:

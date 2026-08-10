@@ -36,6 +36,7 @@ class Graph extends DirCommand<void> {
   Future<void> exec({
     required Directory directory,
     required GgLog ggLog,
+    Map<String, dynamic> options = const {},
   }) async {
     final graph = await get(directory: directory, ggLog: ggLog);
     for (final node in graph.values) {

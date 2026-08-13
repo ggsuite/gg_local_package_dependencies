@@ -20,6 +20,9 @@ class _TestManifest implements PackageManifest {
   final String name;
 
   @override
+  String? get repositoryUrl => null;
+
+  @override
   Iterable<String> get dependencies => const <String>[];
 
   @override
@@ -32,6 +35,8 @@ void main() {
   final dDuplicate = Directory(join('test', 'sample_folder', 'duplicates'));
   final dCircular = Directory(join('test', 'sample_folder', 'circular'));
   final dDev = Directory(join('test', 'sample_folder', 'dev'));
+  final dRenamed = Directory(join('test', 'sample_folder', 'renamed'));
+  final dMultiClaim = Directory(join('test', 'sample_folder', 'multi_claim'));
 
   final dTs = Directory(join('test', 'sample_folder_ts', 'hierarchical'));
   final dPlainTs = Directory(join('test', 'sample_folder_ts', 'plain'));
@@ -284,21 +289,34 @@ void main() {
           expect(result.keys, {'pack0'});
           expect(
             messages,
+            contains(yellow('Found duplicate package name: pack0')),
+          );
+
+          // The folder visited first is kept, the other two are named as the
+          // ones that were dropped.
+          expect(
+            messages,
             contains(
-              yellow('Found duplicate package name: pack0 in ') +
-                  blue(join(dDuplicate.path, 'pack0b')),
+              yellow('  kept    ') + blue(join(dDuplicate.path, 'pack0a')),
             ),
           );
           expect(
             messages,
-            contains(yellow("Project won't be added to dependency graph.")),
+            contains(
+              yellow('  ignored ') + blue(join(dDuplicate.path, 'pack0b')),
+            ),
           );
           expect(
             messages,
             contains(
-              yellow('Found duplicate package name: pack0 in ') +
-                  blue(join(dDuplicate.path, 'pack0c')),
+              yellow('  ignored ') + blue(join(dDuplicate.path, 'pack0c')),
             ),
+          );
+
+          // None of them declares a repository, so this is not a rename.
+          expect(
+            messages.where((m) => m.contains('left over from a rename')),
+            isEmpty,
           );
         });
 
@@ -308,20 +326,80 @@ void main() {
           expect(result.keys, {'pack0'});
           expect(
             messages,
+            contains(yellow('Found duplicate package name: pack0')),
+          );
+          expect(
+            messages,
             contains(
-              yellow('Found duplicate package name: pack0 in ') +
-                  blue(join(dDuplicateTs.path, 'pack0b')),
+              yellow('  kept    ') + blue(join(dDuplicateTs.path, 'pack0a')),
             ),
           );
           expect(
             messages,
-            contains(yellow("Project won't be added to dependency graph.")),
+            contains(
+              yellow('  ignored ') + blue(join(dDuplicateTs.path, 'pack0b')),
+            ),
           );
           expect(
             messages,
             contains(
-              yellow('Found duplicate package name: pack0 in ') +
-                  blue(join(dDuplicateTs.path, 'pack0c')),
+              yellow('  ignored ') + blue(join(dDuplicateTs.path, 'pack0c')),
+            ),
+          );
+        });
+
+        test(
+          'when two folders are left over from a repository rename',
+          () async {
+            // `base_dna` is visited first, but `dna_base` is the folder the
+            // package names as its repository — it must win regardless.
+            final result = await graph.get(directory: dRenamed, ggLog: ggLog);
+
+            expect(result.keys, {'dna_base'});
+            expect(
+              result['dna_base']!.directory.path,
+              join(dRenamed.path, 'dna_base'),
+            );
+
+            expect(
+              messages,
+              contains(yellow('Found duplicate package name: dna_base')),
+            );
+            expect(
+              messages,
+              contains(
+                yellow('  kept    ') + blue(join(dRenamed.path, 'dna_base')),
+              ),
+            );
+            expect(
+              messages,
+              contains(
+                yellow('  ignored ') + blue(join(dRenamed.path, 'base_dna')),
+              ),
+            );
+            expect(
+              messages,
+              contains(
+                yellow(
+                  '  Both folders hold dna_base. The ignored one is left over '
+                  'from a rename and can be removed.',
+                ),
+              ),
+            );
+          },
+        );
+
+        test('when a folder claims the names of two other folders', () async {
+          // `zalpha` declares `alpha` on the Dart and `beta` on the npm side,
+          // so it collides with two nodes at once. Replacing one of them
+          // would leave the collision with the other — it is dropped.
+          final result = await graph.get(directory: dMultiClaim, ggLog: ggLog);
+
+          expect(result.keys.toList()..sort(), ['alpha', 'beta']);
+          expect(
+            messages,
+            contains(
+              yellow('  ignored ') + blue(join(dMultiClaim.path, 'zalpha')),
             ),
           );
         });

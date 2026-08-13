@@ -21,6 +21,9 @@ class _TestManifest implements PackageManifest {
 
   @override
   Iterable<String> get devDependencies => const <String>[];
+
+  @override
+  String? get repositoryUrl => null;
 }
 
 void main() {

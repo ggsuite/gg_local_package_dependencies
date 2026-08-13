@@ -311,5 +311,87 @@ dev_dependencies:
         },
       );
     });
+
+    group('repositoryUrl', () {
+      /// Writes [content] into a fresh package folder and loads its manifest.
+      Future<PackageManifest> manifestOf(
+        String fileName,
+        String content,
+      ) async {
+        final tempDir = await Directory.systemTemp.createTemp('repo_url_test_');
+        final pkgDir = Directory(p.join(tempDir.path, 'pkg'));
+        await pkgDir.create(recursive: true);
+        await File(p.join(pkgDir.path, fileName)).writeAsString(content);
+
+        return fileName == 'pubspec.yaml'
+            ? DartPackageLanguage().loadManifest(pkgDir)
+            : TypeScriptPackageLanguage().loadManifest(pkgDir);
+      }
+
+      group('of a Dart package', () {
+        test('is the declared repository', () async {
+          final manifest = await manifestOf(
+            'pubspec.yaml',
+            'name: p\nrepository: https://github.com/ggsuite/dna_base.git\n',
+          );
+          expect(
+            manifest.repositoryUrl,
+            'https://github.com/ggsuite/dna_base.git',
+          );
+        });
+
+        test('falls back to the homepage', () async {
+          final manifest = await manifestOf(
+            'pubspec.yaml',
+            'name: p\nhomepage: https://github.com/ggsuite/dna_base\n',
+          );
+          expect(manifest.repositoryUrl, 'https://github.com/ggsuite/dna_base');
+        });
+
+        test('is null when neither is declared', () async {
+          final manifest = await manifestOf('pubspec.yaml', 'name: p\n');
+          expect(manifest.repositoryUrl, isNull);
+        });
+      });
+
+      group('of a TypeScript package', () {
+        test('reads the string form of repository', () async {
+          final manifest = await manifestOf(
+            'package.json',
+            '{"name":"p","repository":"https://github.com/tssuite/helix-js"}',
+          );
+          expect(manifest.repositoryUrl, 'https://github.com/tssuite/helix-js');
+        });
+
+        test('reads the object form of repository', () async {
+          final manifest = await manifestOf(
+            'package.json',
+            '{"name":"p","repository":{"type":"git",'
+                '"url":"git+https://github.com/ggsuite/dna_base.git"}}',
+          );
+          expect(
+            manifest.repositoryUrl,
+            'git+https://github.com/ggsuite/dna_base.git',
+          );
+        });
+
+        test('falls back to the homepage', () async {
+          final manifest = await manifestOf(
+            'package.json',
+            '{"name":"p","repository":{"type":"git"},'
+                '"homepage":"https://github.com/ggsuite/dna_base"}',
+          );
+          expect(manifest.repositoryUrl, 'https://github.com/ggsuite/dna_base');
+        });
+
+        test('is null when nothing usable is declared', () async {
+          final manifest = await manifestOf(
+            'package.json',
+            '{"name":"p","repository":"","homepage":42}',
+          );
+          expect(manifest.repositoryUrl, isNull);
+        });
+      });
+    });
   });
 }

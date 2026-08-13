@@ -20,6 +20,15 @@ abstract class PackageManifest {
 
   /// Names of local dev dependencies.
   Iterable<String> get devDependencies;
+
+  /// The repository the package declares for itself, or null when it names
+  /// none.
+  ///
+  /// It is what tells a checkout that sits in the folder its repository is
+  /// named after from one that is a leftover of a rename: the platform keeps
+  /// redirecting the old name, so cloning it succeeds and leaves a second
+  /// folder holding the very same package.
+  String? get repositoryUrl;
 }
 
 /// Describes how to detect and load package manifests for a given language.
@@ -53,6 +62,10 @@ class DartPackageManifest implements PackageManifest {
 
   @override
   Iterable<String> get devDependencies => pubspec.devDependencies.keys;
+
+  @override
+  String? get repositoryUrl =>
+      pubspec.repository?.toString() ?? pubspec.homepage;
 }
 
 /// Package language implementation for Dart.
@@ -104,6 +117,25 @@ class TypeScriptPackageManifest implements PackageManifest {
 
   /// Raw decoded `package.json` contents.
   final Map<String, dynamic> rawJson;
+
+  /// npm writes `repository` either as a plain string or as an object
+  /// carrying the url — both forms are read here, `homepage` serves as
+  /// fallback.
+  @override
+  String? get repositoryUrl {
+    final dynamic repository = rawJson['repository'];
+    if (repository is String && repository.isNotEmpty) {
+      return repository;
+    }
+    if (repository is Map<String, dynamic>) {
+      final dynamic url = repository['url'];
+      if (url is String && url.isNotEmpty) {
+        return url;
+      }
+    }
+    final dynamic homepage = rawJson['homepage'];
+    return homepage is String && homepage.isNotEmpty ? homepage : null;
+  }
 }
 
 /// Package language implementation for TypeScript / JavaScript.

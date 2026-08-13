@@ -104,19 +104,33 @@ class Graph extends DirCommand<void> {
         aliases: aliases,
       );
 
-      // Skip the node if any of its aliases is already claimed by another
-      // node (duplicate package or directory name).
-      final clash = aliases.firstWhere(
-        nodesByAlias.containsKey,
-        orElse: () => '',
-      );
-      if (clash.isNotEmpty) {
+      // Only one node may claim a name. When another one already did, the two
+      // folders hold the same package and one of them has to go.
+      final clashes = aliases.where(nodesByAlias.containsKey).toList();
+      if (clashes.isNotEmpty) {
+        final claimants = <Node>{for (final a in clashes) nodesByAlias[a]!};
+
+        // Taking over is only well defined against a single incumbent —
+        // clashing with two different nodes leaves a clash either way.
+        final incumbent = claimants.first;
+        final takeOver = claimants.length == 1 && _outranks(node, incumbent);
+
         _logDuplicatePackage(
           ggLog: log,
           packageName: node.name,
-          packagePath: dir.path,
+          kept: takeOver ? node : incumbent,
+          ignored: takeOver ? incumbent : node,
         );
-        continue;
+
+        if (!takeOver) {
+          continue;
+        }
+
+        // The incumbent loses its claims before the newcomer takes them: the
+        // two overlap, and edges are wired in a later pass, so nothing points
+        // at either node yet.
+        nodes.remove(incumbent.name);
+        nodesByAlias.removeWhere((_, claimed) => claimed == incumbent);
       }
 
       nodes[node.name] = node;
@@ -313,17 +327,74 @@ class Graph extends DirCommand<void> {
     return !Directory(p.join(dir.path, '.git')).existsSync();
   }
 
-  /// Logs that a duplicate package was found and ignored.
+  /// Whether [candidate] is the better checkout of a package [incumbent]
+  /// claims the name of.
+  ///
+  /// A repository rename leaves the old checkout behind — the platform keeps
+  /// redirecting the old name, so cloning it still succeeds — and the folder
+  /// it sits in no longer matches the repository its own manifests declare.
+  /// Preferring the folder that does match keeps the current checkout in the
+  /// graph instead of whichever of the two happens to be visited first.
+  bool _outranks(Node candidate, Node incumbent) =>
+      _sitsInDeclaredRepoFolder(candidate) &&
+      !_sitsInDeclaredRepoFolder(incumbent);
+
+  /// Whether [node] sits in the folder named after the repository its own
+  /// manifests declare. False when none of them declares one.
+  bool _sitsInDeclaredRepoFolder(Node node) {
+    final declared = _declaredRepoName(node);
+    return declared != null && declared == p.basename(node.directory.path);
+  }
+
+  /// The repository name the manifests of [node] declare, e.g. `dna_base` for
+  /// `git+https://github.com/ggsuite/dna_base.git`, or null when none of them
+  /// names a repository. The last path segment is the repository on every url
+  /// shape the platforms hand out, so splitting is enough here.
+  String? _declaredRepoName(Node node) {
+    for (final manifest in node.manifests) {
+      final segments = (manifest.repositoryUrl ?? '')
+          .split(RegExp(r'[/:]'))
+          .where((segment) => segment.isNotEmpty);
+
+      if (segments.isNotEmpty) {
+        return segments.last.replaceFirst(RegExp(r'\.git$'), '');
+      }
+    }
+    return null;
+  }
+
+  /// Logs that two folders claim one package name and which of them is used.
+  ///
+  /// Naming both sides is what makes the message actionable: the folder that
+  /// is dropped says nothing about the one it collided with, and the pair is
+  /// what tells a leftover of a rename from two genuinely different packages.
   void _logDuplicatePackage({
     required GgLog ggLog,
     required String packageName,
-    required String packagePath,
+    required Node kept,
+    required Node ignored,
   }) {
-    ggLog(
-      yellow('Found duplicate package name: $packageName in ') +
-          blue(packagePath),
-    );
-    ggLog(yellow("Project won't be added to dependency graph."));
+    ggLog(yellow('Found duplicate package name: $packageName'));
+    ggLog(yellow('  kept    ') + blue(kept.directory.path));
+    ggLog(yellow('  ignored ') + blue(ignored.directory.path));
+
+    // Only claimed when the ignored folder itself names another repository
+    // than the one it sits in — two unrelated packages that happen to share a
+    // name are a different problem and must not be reported as a rename.
+    final declared = _declaredRepoName(ignored);
+    final isLeftoverOfRename =
+        declared != null &&
+        declared != p.basename(ignored.directory.path) &&
+        _sitsInDeclaredRepoFolder(kept);
+
+    if (isLeftoverOfRename) {
+      ggLog(
+        yellow(
+          '  Both folders hold $declared. The ignored one is left over from '
+          'a rename and can be removed.',
+        ),
+      );
+    }
   }
 
   /// Prints a node and its dependencies using indentation for hierarchy.

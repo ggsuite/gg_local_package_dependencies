@@ -116,42 +116,37 @@ packages:
   gg_args:
     dependency: "direct main"
     description:
-      name: gg_args
-      sha256: "99f885af29fc49bc2a302ca7cbfbda96f9d35efc3ae9885122ba076bd5d45d8a"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_args"
+      relative: true
+    source: path
     version: "3.1.0"
   gg_capture_print:
     dependency: "direct dev"
     description:
-      name: gg_capture_print
-      sha256: ba6a19c2d7aad636cb306e556ceddb5646ed37380d18ebe9e894586e3e42c5cf
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_capture_print"
+      relative: true
+    source: path
     version: "1.1.0"
   gg_console_colors:
     dependency: "direct main"
     description:
-      name: gg_console_colors
-      sha256: "35d4607f068e726ddbdd3e1ca2db215aa6497bd01ef72eb626c620ce58cb1888"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_console_colors"
+      relative: true
+    source: path
     version: "2.4.0"
   gg_log:
     dependency: "direct main"
     description:
-      name: gg_log
-      sha256: ce3e914a4b276b5462b23dca28d63b3648985f6f2744c5d957faa31ee15ab544
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_log"
+      relative: true
+    source: path
     version: "1.1.0"
   gg_process:
     dependency: "direct main"
     description:
-      name: gg_process
-      sha256: e94a32b4cbbba4e100f0eaec66083d67814ef79d6c0a3a84e11d7c5456350427
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_process"
+      relative: true
+    source: path
     version: "1.2.0"
   glob:
     dependency: transitive

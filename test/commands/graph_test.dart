@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2025 Göran Hegenberg. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -760,13 +760,11 @@ void main() {
         // `@scope/api` and `@other/api` collapse to the same bare name only
         // if the scope is stripped. They must stay distinct nodes.
         Directory(join(ws.path, 'scope_api')).createSync();
-        File(
-          join(ws.path, 'scope_api', 'package.json'),
-        ).writeAsStringSync('{"name":"@scope/api","version":"1.0.0"}');
+        File(join(ws.path, 'scope_api', 'package.json'))
+            .writeAsStringSync('{"name":"@scope/api","version":"1.0.0"}');
         Directory(join(ws.path, 'other_api')).createSync();
-        File(
-          join(ws.path, 'other_api', 'package.json'),
-        ).writeAsStringSync('{"name":"@other/api","version":"1.0.0"}');
+        File(join(ws.path, 'other_api', 'package.json'))
+            .writeAsStringSync('{"name":"@other/api","version":"1.0.0"}');
         // An app that depends specifically on @scope/api.
         Directory(join(ws.path, 'app')).createSync();
         File(join(ws.path, 'app', 'package.json')).writeAsStringSync(
@@ -774,9 +772,8 @@ void main() {
           '"dependencies":{"@scope/api":"^1.0.0"}}',
         );
 
-        final roots = await Graph(
-          ggLog: (_) {},
-        ).get(directory: ws, ggLog: (_) {});
+        final roots = await Graph(ggLog: (_) {})
+            .get(directory: ws, ggLog: (_) {});
         final all = collectAllNodes(roots);
 
         // Both scoped packages survive (no false duplicate-drop).
@@ -864,13 +861,11 @@ void main() {
           ..createSync(recursive: true);
         Directory(join(repo.path, '.git')).createSync();
         Directory(join(repo.path, 'sub')).createSync();
-        File(
-          join(repo.path, 'sub', 'pubspec.yaml'),
-        ).writeAsStringSync('name: hidden_pack\nversion: 1.0.0\n');
+        File(join(repo.path, 'sub', 'pubspec.yaml'))
+            .writeAsStringSync('name: hidden_pack\nversion: 1.0.0\n');
 
-        final roots = await Graph(
-          ggLog: (_) {},
-        ).get(directory: ws, ggLog: (_) {});
+        final roots = await Graph(ggLog: (_) {})
+            .get(directory: ws, ggLog: (_) {});
         expect(roots, isEmpty);
       } finally {
         ws.deleteSync(recursive: true);
@@ -882,13 +877,11 @@ void main() {
       try {
         final hidden = Directory(join(ws.path, '.cache', 'pack'))
           ..createSync(recursive: true);
-        File(
-          join(hidden.path, 'pubspec.yaml'),
-        ).writeAsStringSync('name: cached_pack\nversion: 1.0.0\n');
+        File(join(hidden.path, 'pubspec.yaml'))
+            .writeAsStringSync('name: cached_pack\nversion: 1.0.0\n');
 
-        final roots = await Graph(
-          ggLog: (_) {},
-        ).get(directory: ws, ggLog: (_) {});
+        final roots = await Graph(ggLog: (_) {})
+            .get(directory: ws, ggLog: (_) {});
         expect(roots, isEmpty);
       } finally {
         ws.deleteSync(recursive: true);
@@ -929,9 +922,8 @@ void main() {
           );
 
           final masterPack = pack('master', 'pack_b');
-          File(
-            join(masterPack.path, 'pubspec.yaml'),
-          ).writeAsStringSync('name: pack_b\nversion: 1.0.0\n');
+          File(join(masterPack.path, 'pubspec.yaml'))
+              .writeAsStringSync('name: pack_b\nversion: 1.0.0\n');
 
           final roots = await Graph(ggLog: (_) {}).get(
             directory: ws,

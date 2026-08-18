@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Use ggwsm in pipelines
+
 ## 4.1.0 - 2026-08-13
 
 ### Changed

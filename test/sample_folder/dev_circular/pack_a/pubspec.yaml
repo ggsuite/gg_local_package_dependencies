@@ -1,0 +1,5 @@
+name: pack_a
+version: 1.0.0
+
+dependencies:
+  pack_b: ^1.0.0

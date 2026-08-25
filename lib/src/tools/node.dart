@@ -52,6 +52,14 @@ class Node {
   /// Nodes this package needs to work.
   final Map<String, Node> dependencies = {};
 
+  /// Names of the [dependencies] entries declared only as dev dependencies.
+  ///
+  /// Such an edge still orders the graph — a package has to be released
+  /// before the one that tests against it — but it may be cut when it closes
+  /// a cycle. A name declared as both counts as a regular dependency and is
+  /// not listed here.
+  final Set<String> devOnlyDependencies = {};
+
   /// Nodes that need this package to work.
   final Map<String, Node> dependents = {};
 

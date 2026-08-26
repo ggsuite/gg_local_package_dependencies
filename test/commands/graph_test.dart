@@ -34,6 +34,10 @@ void main() {
   final dPlain = Directory(join('test', 'sample_folder', 'plain'));
   final dDuplicate = Directory(join('test', 'sample_folder', 'duplicates'));
   final dCircular = Directory(join('test', 'sample_folder', 'circular'));
+  final dDevCircular = Directory(join('test', 'sample_folder', 'dev_circular'));
+  final dDevCircularMulti = Directory(
+    join('test', 'sample_folder', 'dev_circular_multi'),
+  );
   final dDev = Directory(join('test', 'sample_folder', 'dev'));
   final dRenamed = Directory(join('test', 'sample_folder', 'renamed'));
   final dMultiClaim = Directory(join('test', 'sample_folder', 'multi_claim'));
@@ -234,6 +238,46 @@ void main() {
           expect(exception, contains('pack1 -> pack2 -> pack3b -> pack1'));
         },
       );
+
+      test('resolves a cycle that closes over a dev dependency', () async {
+        // pack_a -> pack_b -> pack_c -> pack_a, where pack_b -> pack_c is
+        // the only dev edge. Cutting it leaves the order the regular
+        // dependencies demand.
+        final result = await graph.get(directory: dDevCircular, ggLog: ggLog);
+
+        expect(result.keys, ['pack_c']);
+
+        final packB =
+            result['pack_c']!.dependencies['pack_a']!.dependencies['pack_b']!;
+        expect(packB.dependencies, isEmpty);
+        expect(packB.devOnlyDependencies, isEmpty);
+
+        expect(
+          messages,
+          contains(
+            yellow('Broke dev dependency pack_b -> pack_c to resolve a cycle.'),
+          ),
+        );
+      });
+
+      test('cuts the same dev edge whatever the read order', () async {
+        // m_a -> m_b (dev), m_b -> m_c, m_c -> m_a (dev): two candidates.
+        // m_a sorts before m_b, so m_c -> m_a is the one that falls.
+        final result = await graph.get(
+          directory: dDevCircularMulti,
+          ggLog: ggLog,
+        );
+
+        expect(result.keys, ['m_a']);
+        expect(result['m_a']!.dependencies.keys, ['m_b']);
+
+        expect(
+          messages,
+          contains(
+            yellow('Broke dev dependency m_c -> m_a to resolve a cycle.'),
+          ),
+        );
+      });
 
       test('should incorporate dev dependencies', () async {
         final result = await graph.get(directory: dDev, ggLog: ggLog);

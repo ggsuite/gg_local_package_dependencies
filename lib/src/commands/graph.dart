@@ -143,29 +143,48 @@ class Graph extends DirCommand<void> {
     for (final node in nodes.values) {
       // Union of the dependencies declared by every manifest of the node, so
       // both the Dart and the TypeScript side of a cross-language repo
-      // contribute edges.
-      final dependencyNames = <String>{
+      // contribute edges. The two kinds are resolved separately: a dev-only
+      // edge may later be cut to break a cycle, a regular one may not.
+      final regularNames = <String>{
         for (final manifest in node.manifests) ...manifest.dependencies,
+      };
+      final devNames = <String>{
         for (final manifest in node.manifests) ...manifest.devDependencies,
       };
 
-      for (final dependency in dependencyNames) {
-        // Resolve the dependency against any known alias. This is what lets a
-        // TypeScript package depending on the npm name of a bridge reach the
-        // node that is primarily known under its Dart name.
-        final dependentNode = nodesByAlias[dependency];
-        if (dependentNode == null || identical(dependentNode, node)) {
-          continue;
+      // Resolve [names] to nodes, add the edges, and collect the resolved
+      // primary names in [into]. Resolution goes through the aliases, which
+      // is what lets a TypeScript package depending on the npm name of a
+      // bridge reach the node that is primarily known under its Dart name.
+      void addEdges(Set<String> names, Set<String> into) {
+        for (final dependency in names) {
+          final dependentNode = nodesByAlias[dependency];
+          if (dependentNode == null || identical(dependentNode, node)) {
+            continue;
+          }
+
+          into.add(dependentNode.name);
+
+          // Keyed by the resolved primary name so aliases collapse to a
+          // single edge.
+          node.dependencies[dependentNode.name] = dependentNode;
+          dependentNode.dependents[node.name] = node;
         }
-
-        // Add the dependency to the dependencies list (keyed by the resolved
-        // primary name so aliases collapse to a single edge).
-        node.dependencies[dependentNode.name] = dependentNode;
-
-        // Add this node to the dependents list of the dependent node.
-        dependentNode.dependents[node.name] = node;
       }
+
+      // Compared after resolution, not before: two different names can be
+      // aliases of the same node, and an edge that is regular under any name
+      // must not end up marked dev-only.
+      final regularTargets = <String>{};
+      final devTargets = <String>{};
+      addEdges(regularNames, regularTargets);
+      addEdges(devNames, devTargets);
+      node.devOnlyDependencies.addAll(devTargets.difference(regularTargets));
     }
+
+    // Cut the cycles that only close over a dev dependency, then report
+    // whatever cycle is left as the error it is.
+    _breakDevDependencyCycles(nodes.values, log);
 
     // Detect circular dependencies.
     final coveredNodes = <Node>[];
@@ -403,6 +422,94 @@ class Graph extends DirCommand<void> {
     for (final dependency in node.dependencies.values) {
       _printNode(dependency, ggLog, indentation + 1);
     }
+  }
+
+  /// Cuts dev-dependency edges until no cycle runs through one.
+  ///
+  /// pub accepts a cycle that closes over a dev dependency — `helix` tests
+  /// against `gg_args` while `gg_args` builds on `helix` — but a release
+  /// order cannot contain one. Cutting the dev edge keeps the order the
+  /// regular dependencies demand and drops only the weaker constraint.
+  ///
+  /// A cycle made of regular dependencies alone is left in place; it is a
+  /// real error and [_detectCircularDependencies] reports it.
+  void _breakDevDependencyCycles(Iterable<Node> nodes, GgLog log) {
+    while (true) {
+      final cycle = _findCycle(nodes);
+      if (cycle == null) {
+        return;
+      }
+
+      // The edge to cut is picked by name, so the same graph always yields
+      // the same order no matter which sequence the packages were read in.
+      Node? cutFrom;
+      Node? cutTo;
+      for (var i = 0; i < cycle.length - 1; i++) {
+        final from = cycle[i];
+        final to = cycle[i + 1];
+        if (!from.devOnlyDependencies.contains(to.name)) {
+          continue;
+        }
+        if (cutTo == null || to.name.compareTo(cutTo.name) < 0) {
+          cutFrom = from;
+          cutTo = to;
+        }
+      }
+
+      if (cutFrom == null || cutTo == null) {
+        return;
+      }
+
+      cutFrom.dependencies.remove(cutTo.name);
+      cutFrom.devOnlyDependencies.remove(cutTo.name);
+      cutTo.dependents.remove(cutFrom.name);
+
+      log(
+        yellow(
+          'Broke dev dependency ${cutFrom.name} -> ${cutTo.name} '
+          'to resolve a cycle.',
+        ),
+      );
+    }
+  }
+
+  /// Returns the nodes of one cycle, first and last entry equal, or `null`
+  /// when [nodes] is acyclic.
+  List<Node>? _findCycle(Iterable<Node> nodes) {
+    final path = <Node>[];
+    final onPath = <Node>{};
+    final settled = <Node>{};
+
+    List<Node>? visit(Node node) {
+      if (onPath.contains(node)) {
+        return <Node>[...path.sublist(path.indexOf(node)), node];
+      }
+      if (settled.contains(node)) {
+        return null;
+      }
+
+      path.add(node);
+      onPath.add(node);
+      // Copied: the caller removes edges between two searches.
+      for (final dependency in node.dependencies.values.toList()) {
+        final cycle = visit(dependency);
+        if (cycle != null) {
+          return cycle;
+        }
+      }
+      path.removeLast();
+      onPath.remove(node);
+      settled.add(node);
+      return null;
+    }
+
+    for (final node in nodes) {
+      final cycle = visit(node);
+      if (cycle != null) {
+        return cycle;
+      }
+    }
+    return null;
   }
 
   /// Detects circular dependencies and throws an exception if a cycle is found.

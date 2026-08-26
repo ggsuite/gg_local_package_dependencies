@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## 4.1.1 - 2026-08-26
 
 ### Changed
 
 - Use ggwsm in pipelines
+- Resolve dependency cycles that close over a dev dependency
 
 ## 4.1.0 - 2026-08-13
 

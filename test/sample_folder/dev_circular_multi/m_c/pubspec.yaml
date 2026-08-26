@@ -1,0 +1,5 @@
+name: m_c
+version: 1.0.0
+
+dev_dependencies:
+  m_a: ^1.0.0

@@ -9,4 +9,4 @@
 // coverage:ignore-file
 
 /// The version of the `gg_local_package_dependencies` package.
-const String ggLocalPackageDependenciesVersion = '4.1.1';
+const String ggLocalPackageDependenciesVersion = '4.1.2';

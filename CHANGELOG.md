@@ -6,6 +6,10 @@
 
 - Rename the dna_base test fixtures to dna_dart
 
+### Removed
+
+- Remove the stray ticket.json from the repository root
+
 ## 4.2.0 - 2026-09-02
 
 ### Changed

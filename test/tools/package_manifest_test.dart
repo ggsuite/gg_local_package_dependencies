@@ -332,20 +332,20 @@ dev_dependencies:
         test('is the declared repository', () async {
           final manifest = await manifestOf(
             'pubspec.yaml',
-            'name: p\nrepository: https://github.com/ggsuite/dna_base.git\n',
+            'name: p\nrepository: https://github.com/ggdna/dna_dart.git\n',
           );
           expect(
             manifest.repositoryUrl,
-            'https://github.com/ggsuite/dna_base.git',
+            'https://github.com/ggdna/dna_dart.git',
           );
         });
 
         test('falls back to the homepage', () async {
           final manifest = await manifestOf(
             'pubspec.yaml',
-            'name: p\nhomepage: https://github.com/ggsuite/dna_base\n',
+            'name: p\nhomepage: https://github.com/ggdna/dna_dart\n',
           );
-          expect(manifest.repositoryUrl, 'https://github.com/ggsuite/dna_base');
+          expect(manifest.repositoryUrl, 'https://github.com/ggdna/dna_dart');
         });
 
         test('is null when neither is declared', () async {
@@ -367,11 +367,11 @@ dev_dependencies:
           final manifest = await manifestOf(
             'package.json',
             '{"name":"p","repository":{"type":"git",'
-                '"url":"git+https://github.com/ggsuite/dna_base.git"}}',
+                '"url":"git+https://github.com/ggdna/dna_dart.git"}}',
           );
           expect(
             manifest.repositoryUrl,
-            'git+https://github.com/ggsuite/dna_base.git',
+            'git+https://github.com/ggdna/dna_dart.git',
           );
         });
 
@@ -379,9 +379,9 @@ dev_dependencies:
           final manifest = await manifestOf(
             'package.json',
             '{"name":"p","repository":{"type":"git"},'
-                '"homepage":"https://github.com/ggsuite/dna_base"}',
+                '"homepage":"https://github.com/ggdna/dna_dart"}',
           );
-          expect(manifest.repositoryUrl, 'https://github.com/ggsuite/dna_base');
+          expect(manifest.repositoryUrl, 'https://github.com/ggdna/dna_dart');
         });
 
         test('is null when nothing usable is declared', () async {

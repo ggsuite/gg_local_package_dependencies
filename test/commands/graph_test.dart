@@ -395,37 +395,37 @@ void main() {
         test(
           'when two folders are left over from a repository rename',
           () async {
-            // `base_dna` is visited first, but `dna_base` is the folder the
+            // `dart_dna` is visited first, but `dna_dart` is the folder the
             // package names as its repository — it must win regardless.
             final result = await graph.get(directory: dRenamed, ggLog: ggLog);
 
-            expect(result.keys, {'dna_base'});
+            expect(result.keys, {'dna_dart'});
             expect(
-              result['dna_base']!.directory.path,
-              join(dRenamed.path, 'dna_base'),
+              result['dna_dart']!.directory.path,
+              join(dRenamed.path, 'dna_dart'),
             );
 
             expect(
               messages,
-              contains(yellow('Found duplicate package name: dna_base')),
+              contains(yellow('Found duplicate package name: dna_dart')),
             );
             expect(
               messages,
               contains(
-                yellow('  kept    ') + blue(join(dRenamed.path, 'dna_base')),
+                yellow('  kept    ') + blue(join(dRenamed.path, 'dna_dart')),
               ),
             );
             expect(
               messages,
               contains(
-                yellow('  ignored ') + blue(join(dRenamed.path, 'base_dna')),
+                yellow('  ignored ') + blue(join(dRenamed.path, 'dart_dna')),
               ),
             );
             expect(
               messages,
               contains(
                 yellow(
-                  '  Both folders hold dna_base. The ignored one is left over '
+                  '  Both folders hold dna_dart. The ignored one is left over '
                   'from a rename and can be removed.',
                 ),
               ),

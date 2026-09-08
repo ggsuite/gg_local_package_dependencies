@@ -365,8 +365,8 @@ class Graph extends DirCommand<void> {
     return declared != null && declared == p.basename(node.directory.path);
   }
 
-  /// The repository name the manifests of [node] declare, e.g. `dna_base` for
-  /// `git+https://github.com/ggsuite/dna_base.git`, or null when none of them
+  /// The repository name the manifests of [node] declare, e.g. `dna_dart` for
+  /// `git+https://github.com/ggdna/dna_dart.git`, or null when none of them
   /// names a repository. The last path segment is the repository on every url
   /// shape the platforms hand out, so splitting is enough here.
   String? _declaredRepoName(Node node) {

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Rename the dna_base test fixtures to dna_dart
+
 ## 4.2.0 - 2026-09-02
 
 ### Changed

@@ -4,7 +4,8 @@
 
 ### Changed
 
-- &quot;Quiet
+- "Quiet
+- &quot;Tighten
 
 ### Fixed
 

@@ -1,6 +1,6 @@
 name: gg_local_package_dependencies
 description: gg_local_package_dependencies reads packages located in a local folder and creates a dependency graph.
-version: 4.2.0
+version: 4.2.1
 repository: https://github.com/inlavigo/gg_local_package_dependencies.git
 
 environment:
@@ -18,9 +18,9 @@ dependencies:
   pubspec_parse: ^1.6.0
 
 dev_dependencies:
-  dna_ggsuite: ^0.2.1
+  dna_ggsuite: ^0.2.2
   gg_capture_print: ^1.2.0
-  helix: ^1.5.1
+  helix: ^1.9.0
   lints: ^6.1.0
   test: ^1.32.0
 

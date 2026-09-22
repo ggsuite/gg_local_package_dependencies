@@ -49,3 +49,19 @@ The public library surface is `lib/gg_local_package_dependencies.dart`, which re
 ## Tests
 
 Fixture-based. `test/sample_folder/` (Dart) and `test/sample_folder_ts/` (TypeScript) each contain `plain/`, `hierarchical/`, `dev/`, `duplicates/`, and `circular/` subtrees that graph/processing tests run against. When touching graph logic, add or adjust a fixture under the relevant scenario folder rather than inventing ad-hoc test dirs.
+
+<!-- helix:claude_md:start -->
+
+# gg workflow
+
+This repo is developed ticket by ticket with the `gg` CLI. Follow the
+development guide, it tells you when to ask the user and which command
+comes next:
+
+@doc/guides/for-ai/ai-dev-guide.md
+
+The steps are also available as skills: `/gg-ticket`, `/gg-commit`,
+`/gg-push`, `/gg-publish`, `/gg-cleanup`. `/gg` lists them and says which
+one comes next.
+
+<!-- helix:claude_md:end -->

@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## 4.2.1 - 2026-09-22
+
+### Changed
+
+- "Quiet
+- "Tighten
 
 ### Fixed
 

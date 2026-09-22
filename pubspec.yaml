@@ -18,9 +18,9 @@ dependencies:
   pubspec_parse: ^1.6.0
 
 dev_dependencies:
-  dna_ggsuite: ^0.2.1
+  dna_ggsuite: ^0.2.2
   gg_capture_print: ^1.2.0
-  helix: ^1.8.0
+  helix: ^1.9.0
   lints: ^6.1.0
   test: ^1.32.0
 

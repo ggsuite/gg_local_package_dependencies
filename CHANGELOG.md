@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.2.2 - 2026-10-06
+
+### Changed
+
+- Upgrade dependencies
+
 ## 4.2.1 - 2026-09-22
 
 ### Changed

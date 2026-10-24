@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Add the blog post of ticket gg-1
+
 ### Changed
 
 - Make gg checks work on Windows

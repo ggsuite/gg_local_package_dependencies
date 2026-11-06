@@ -13,7 +13,8 @@ creates and pushes the version tags. It is interactive — the user runs it.
 - Every repo of the ticket is committed and pushed.
 - The pull requests created by `gg do review` are green.
 - Every repo with `doc/guides/blog-guide.md` holds the post of this ticket
-  in `doc/blog/<yyyy>`. If one is missing, go back to `/gg-review`.
+  in `doc/blog/<yyyy>`, a project management repo in
+  `doc/<yyyy>-Q<n>/blog`. If one is missing, go back to `/gg-review`.
 
 ## 2. Configure the publish
 

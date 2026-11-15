@@ -51,7 +51,4 @@ The public library surface is `lib/gg_local_package_dependencies.dart`, which re
 Fixture-based. `test/sample_folder/` (Dart) and `test/sample_folder_ts/` (TypeScript) each contain `plain/`, `hierarchical/`, `dev/`, `duplicates/`, and `circular/` subtrees that graph/processing tests run against. When touching graph logic, add or adjust a fixture under the relevant scenario folder rather than inventing ad-hoc test dirs.
 
 <!-- helix:claude_md:start -->
-
-@.claude/CLAUDE_dna_gg.md
-
 <!-- helix:claude_md:end -->

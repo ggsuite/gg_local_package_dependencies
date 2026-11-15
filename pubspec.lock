@@ -109,10 +109,10 @@ packages:
     dependency: transitive
     description:
       name: dna_blog
-      sha256: ec676f751442e6f1b0e2423e76554341a04c11000ba743142ff884b939ed321b
+      sha256: "3f02de53c30b862b26aac473bc65e81626318184482249a98dd6090a31b58cf7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.0"
   dna_clean_code:
     dependency: transitive
     description:
@@ -121,22 +121,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.0"
-  dna_gg:
-    dependency: transitive
-    description:
-      name: dna_gg
-      sha256: "76daf1c5faff22e1373a81a5cd179efedb98e1582c0bd93c4031b81158fd7846"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.5.0"
   dna_ggsuite:
     dependency: "direct dev"
     description:
       name: dna_ggsuite
-      sha256: d11f44df50f861602137f28b49519043dcab1a0606240f49b4126c355231f89b
+      sha256: "3897b2632e7af7180383a20ba3b1494ca994272467c823816a11b27fdb2bfb4f"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "2.0.0"
   dna_github:
     dependency: transitive
     description:
@@ -189,10 +181,10 @@ packages:
     dependency: transitive
     description:
       name: dna_translate
-      sha256: c6c72c756b93377e6d4232c4e773fe9ed478da5570e9b1680b9bf4e4f1d345de
+      sha256: "42299a3ee0623e4c00ee260e72956523d6eb8869b41b63664bb243ca508b5da3"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.0"
   dna_vscode:
     dependency: transitive
     description:
@@ -293,10 +285,10 @@ packages:
     dependency: "direct dev"
     description:
       name: helix
-      sha256: ef8f11569ff5d8e3c86b569c7a20598e266ea5d7ae8d8b24d82fbc1ad1c0e43a
+      sha256: b537b80216f6fa539e209da123ca3bc42a293629530c31aa3dd42c0ae62db0ec
       url: "https://pub.dev"
     source: hosted
-    version: "1.14.0"
+    version: "1.15.1"
   http_multi_server:
     dependency: transitive
     description:

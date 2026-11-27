@@ -1,0 +1,26 @@
+# .gitignore
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool/
+
+
+node_modules
+coverage
+build
+*.vm.json
+.DS_Store
+
+.aicode
+.gg/*
+!.gg/gg.json
+.gg/.gg-publish.json
+.gg/gg-publish.json
+.gg/pubspec_overrides_backup.yaml
+.gg/pnpm_workspace_backup.yaml
+.gg/publish_config.json
+.gg/publish_state.json
+
+# dna-readme
+/doc/*/guides/
+/doc/*/templates/
+/scripts/

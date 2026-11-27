@@ -4,7 +4,7 @@ version: 4.2.4
 repository: https://github.com/inlavigo/gg_local_package_dependencies.git
 
 environment:
-  sdk: ">=3.13.0 <4.0.0"
+  sdk: ">=3.14.0 <4.0.0"
 
 dependencies:
   args: ^2.7.0
@@ -18,7 +18,7 @@ dependencies:
   pubspec_parse: ^1.7.0
 
 dev_dependencies:
-  dna_ggsuite: ^2.0.0
+  dna_ggsuite: ^3.0.0
   gg_capture_print: ^1.2.1
   helix: ^1.14.0
   lints: ^6.1.0
